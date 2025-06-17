@@ -271,14 +271,18 @@
           <v-card-text>
             <v-btn
               block
-              :color="currentBooking?.confirmed ? 'grey' : 'success'"
-              :variant="currentBooking?.confirmed ? 'outlined' : 'elevated'"
+              :color="
+                currentBooking?.status === 'confirmed' ? 'grey' : 'success'
+              "
+              :variant="
+                currentBooking?.status === 'confirmed' ? 'outlined' : 'elevated'
+              "
               class="mb-2"
               prepend-icon="mdi-check"
               @click="confirmBooking"
             >
               {{
-                currentBooking?.confirmed
+                currentBooking?.status === "confirmed"
                   ? "Booking Confirmed"
                   : "Confirm Booking"
               }}
@@ -1171,13 +1175,26 @@ const guestFilter = (value: string, query: string, item?: any) => {
   return searchableText.includes(searchQuery);
 };
 
+// Helper function to extract meaningful error messages
+const extractErrorMessage = (error: any, defaultMessage: string): string => {
+  if (error.response?.data?.detail) {
+    return error.response.data.detail;
+  } else if (error.response?.data?.message) {
+    return error.response.data.message;
+  } else if (error.message) {
+    return error.message;
+  }
+  return defaultMessage;
+};
+
 // Methods
 const loadGuests = async () => {
   try {
     guests.value = await GuestService.getAll();
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error loading guests:", error);
-    showSnackbar("Error loading guests", "error");
+    const errorMessage = extractErrorMessage(error, "Error loading guests");
+    showSnackbar(errorMessage, "error");
   }
 };
 
@@ -1198,9 +1215,13 @@ const loadBooking = async () => {
       kurtaxe_amount: currentBooking.value.kurtaxe_amount || undefined,
       kurtaxe_notes: currentBooking.value.kurtaxe_notes || "",
     };
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error loading booking:", error);
-    showSnackbar("Error loading booking details", "error");
+    const errorMessage = extractErrorMessage(
+      error,
+      "Error loading booking details"
+    );
+    showSnackbar(errorMessage, "error");
     router.push("/bookings");
   } finally {
     loading.value = false;
@@ -1245,13 +1266,15 @@ const handleSubmit = async () => {
         guest_id: formData.value.guest_id!,
         check_in: formData.value.check_in,
         check_out: formData.value.check_out,
+        status: "new",
       });
       showSnackbar("Booking created successfully", "success");
       router.push("/bookings");
     }
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error saving booking:", error);
-    showSnackbar("Error saving booking", "error");
+    const errorMessage = extractErrorMessage(error, "Error saving booking");
+    showSnackbar(errorMessage, "error");
   } finally {
     loading.value = false;
   }
@@ -1264,11 +1287,12 @@ const confirmBooking = async () => {
     await BookingService.confirm(parseInt(bookingId.value));
     showSnackbar("Booking confirmed successfully", "success");
     if (currentBooking.value) {
-      currentBooking.value.confirmed = true;
+      currentBooking.value.status = "confirmed";
     }
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error confirming booking:", error);
-    showSnackbar("Error confirming booking", "error");
+    const errorMessage = extractErrorMessage(error, "Error confirming booking");
+    showSnackbar(errorMessage, "error");
   }
 };
 

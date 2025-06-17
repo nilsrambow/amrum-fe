@@ -22,37 +22,87 @@
       </v-col>
     </v-row>
 
+    <!-- Email Alerts -->
+    <v-row class="mb-6">
+      <v-col cols="12">
+        <EmailAlerts />
+      </v-col>
+    </v-row>
+
+    <!-- Outstanding Guest Actions -->
+    <v-row class="mb-6">
+      <v-col cols="12">
+        <GuestActions />
+      </v-col>
+    </v-row>
+
     <!-- Quick Stats -->
     <v-row class="mb-6">
-      <v-col cols="6" sm="3">
-        <v-card class="text-center pa-4" color="primary" dark>
-          <v-icon size="32" class="mb-2">mdi-calendar-check</v-icon>
-          <div class="text-h6 font-weight-bold">{{ stats.total }}</div>
-          <div class="text-caption">Total Bookings</div>
+      <v-col cols="6" sm="3" md="2">
+        <v-card class="text-center pa-3" color="warning" dark>
+          <v-icon size="24" class="mb-1">mdi-calendar-plus</v-icon>
+          <div class="text-h6 font-weight-bold">{{ stats.newBookings }}</div>
+          <div class="text-caption">New</div>
         </v-card>
       </v-col>
 
-      <v-col cols="6" sm="3">
-        <v-card class="text-center pa-4" color="success" dark>
-          <v-icon size="32" class="mb-2">mdi-check-circle</v-icon>
+      <v-col cols="6" sm="3" md="2">
+        <v-card class="text-center pa-3" color="info" dark>
+          <v-icon size="24" class="mb-1">mdi-calendar-check</v-icon>
           <div class="text-h6 font-weight-bold">{{ stats.confirmed }}</div>
           <div class="text-caption">Confirmed</div>
         </v-card>
       </v-col>
 
-      <v-col cols="6" sm="3">
-        <v-card class="text-center pa-4" color="warning" dark>
-          <v-icon size="32" class="mb-2">mdi-clock-outline</v-icon>
-          <div class="text-h6 font-weight-bold">{{ stats.pending }}</div>
-          <div class="text-caption">Pending</div>
+      <v-col cols="6" sm="3" md="2">
+        <v-card class="text-center pa-3" color="cyan" dark>
+          <v-icon size="24" class="mb-1">mdi-card-account-details</v-icon>
+          <div class="text-h6 font-weight-bold">
+            {{ stats.kurkartenRequested }}
+          </div>
+          <div class="text-caption">Kurkarten</div>
         </v-card>
       </v-col>
 
-      <v-col cols="6" sm="3">
-        <v-card class="text-center pa-4" color="info" dark>
-          <v-icon size="32" class="mb-2">mdi-calendar-today</v-icon>
-          <div class="text-h6 font-weight-bold">{{ stats.active }}</div>
-          <div class="text-caption">Active Now</div>
+      <v-col cols="6" sm="3" md="2">
+        <v-card class="text-center pa-3" color="success" dark>
+          <v-icon size="24" class="mb-1">mdi-calendar-clock</v-icon>
+          <div class="text-h6 font-weight-bold">
+            {{ stats.readyForArrival }}
+          </div>
+          <div class="text-caption">Ready</div>
+        </v-card>
+      </v-col>
+
+      <v-col cols="6" sm="3" md="2">
+        <v-card class="text-center pa-3" color="purple" dark>
+          <v-icon size="24" class="mb-1">mdi-car</v-icon>
+          <div class="text-h6 font-weight-bold">{{ stats.arriving }}</div>
+          <div class="text-caption">Arriving</div>
+        </v-card>
+      </v-col>
+
+      <v-col cols="6" sm="3" md="2">
+        <v-card class="text-center pa-3" color="green" dark>
+          <v-icon size="24" class="mb-1">mdi-home</v-icon>
+          <div class="text-h6 font-weight-bold">{{ stats.onSite }}</div>
+          <div class="text-caption">On Site</div>
+        </v-card>
+      </v-col>
+
+      <v-col cols="6" sm="3" md="2">
+        <v-card class="text-center pa-3" color="orange" dark>
+          <v-icon size="24" class="mb-1">mdi-car-side</v-icon>
+          <div class="text-h6 font-weight-bold">{{ stats.departing }}</div>
+          <div class="text-caption">Departing</div>
+        </v-card>
+      </v-col>
+
+      <v-col cols="6" sm="3" md="2">
+        <v-card class="text-center pa-3" color="error" dark>
+          <v-icon size="24" class="mb-1">mdi-gauge-empty</v-icon>
+          <div class="text-h6 font-weight-bold">{{ stats.readingsDue }}</div>
+          <div class="text-caption">Readings Due</div>
         </v-card>
       </v-col>
     </v-row>
@@ -104,12 +154,12 @@
     <v-card>
       <v-card-title>
         <v-icon class="mr-2">mdi-calendar-multiple</v-icon>
-        All Bookings ({{ filteredBookings.length }})
+        All Bookings ({{ bookingsWithGuests.length }})
       </v-card-title>
 
       <v-data-table
         :headers="headers"
-        :items="filteredBookings"
+        :items="bookingsWithGuests"
         :loading="loading"
         :search="search"
         class="elevation-1"
@@ -117,20 +167,9 @@
       >
         <!-- Guest column -->
         <template v-slot:[`item.guest`]="{ item }">
-          <div class="d-flex align-center">
-            <v-avatar color="primary" size="32" class="mr-3">
-              <span class="text-white">
-                {{ item.guest?.first_name?.[0]
-                }}{{ item.guest?.last_name?.[0] }}
-              </span>
-            </v-avatar>
-            <div>
-              <div class="font-weight-medium">
-                {{ item.guest?.first_name }} {{ item.guest?.last_name }}
-              </div>
-              <div class="text-caption text-medium-emphasis">
-                {{ item.guest?.email }}
-              </div>
+          <div>
+            <div class="font-weight-medium">
+              {{ item.guest?.first_name }} {{ item.guest?.last_name }}
             </div>
           </div>
         </template>
@@ -153,8 +192,12 @@
         <!-- Status column -->
         <template v-slot:[`item.status`]="{ item }">
           <div class="d-flex flex-column gap-1">
-            <v-chip :color="getStatusColor(item)" size="small" variant="tonal">
-              {{ getStatusText(item) }}
+            <v-chip
+              :color="getStatusColor(item.status)"
+              size="small"
+              variant="tonal"
+            >
+              {{ getStatusText(item.status) }}
             </v-chip>
             <v-chip
               v-if="item.paid"
@@ -195,7 +238,10 @@
               </template>
             </v-tooltip>
 
-            <v-tooltip v-if="!item.confirmed" text="Confirm Booking">
+            <v-tooltip
+              v-if="item.status !== 'confirmed'"
+              text="Confirm Booking"
+            >
               <template #activator="{ props }">
                 <v-btn
                   v-bind="props"
@@ -268,12 +314,20 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from "vue";
 import { useRouter } from "vue-router";
-import { BookingService, type Booking } from "@/services/api";
+import {
+  BookingService,
+  GuestService,
+  type Booking,
+  type Guest,
+} from "@/services/api";
+import EmailAlerts from "@/components/EmailAlerts.vue";
+import GuestActions from "@/components/GuestActions.vue";
 
 const router = useRouter();
 
 // Reactive data
 const bookings = ref<Booking[]>([]);
+const guests = ref<Guest[]>([]);
 const loading = ref(false);
 const search = ref("");
 const filterStatus = ref<string | null>(null);
@@ -294,8 +348,14 @@ const headers = [
 // Filter options
 const statusFilterOptions = [
   { title: "All Statuses", value: null },
-  { title: "Pending", value: "pending" },
+  { title: "New", value: "new" },
   { title: "Confirmed", value: "confirmed" },
+  { title: "Kurkarten Requested", value: "kurkarten_requested" },
+  { title: "Ready for Arrival", value: "ready_for_arrival" },
+  { title: "Arriving", value: "arriving" },
+  { title: "On Site", value: "on_site" },
+  { title: "Departing", value: "departing" },
+  { title: "Departed - Readings Due", value: "departed_readings_due" },
 ];
 
 const paymentFilterOptions = [
@@ -306,15 +366,35 @@ const paymentFilterOptions = [
 
 // Computed stats
 const stats = computed(() => {
-  const total = bookings.value.length;
-  const confirmed = bookings.value.filter((b) => b.confirmed).length;
-  const pending = bookings.value.filter((b) => !b.confirmed).length;
-  const today = new Date().toISOString().split("T")[0];
-  const active = bookings.value.filter(
-    (b) => b.check_in <= today && b.check_out >= today
+  const newBookings = bookings.value.filter((b) => b.status === "new").length;
+  const confirmed = bookings.value.filter(
+    (b) => b.status === "confirmed"
+  ).length;
+  const kurkartenRequested = bookings.value.filter(
+    (b) => b.status === "kurkarten_requested"
+  ).length;
+  const readyForArrival = bookings.value.filter(
+    (b) => b.status === "ready_for_arrival"
+  ).length;
+  const arriving = bookings.value.filter((b) => b.status === "arriving").length;
+  const onSite = bookings.value.filter((b) => b.status === "on_site").length;
+  const departing = bookings.value.filter(
+    (b) => b.status === "departing"
+  ).length;
+  const readingsDue = bookings.value.filter(
+    (b) => b.status === "departed_readings_due"
   ).length;
 
-  return { total, confirmed, pending, active };
+  return {
+    newBookings,
+    confirmed,
+    kurkartenRequested,
+    readyForArrival,
+    arriving,
+    onSite,
+    departing,
+    readingsDue,
+  };
 });
 
 // Computed filtered bookings
@@ -322,11 +402,9 @@ const filteredBookings = computed(() => {
   let filtered = bookings.value;
 
   if (filterStatus.value) {
-    if (filterStatus.value === "confirmed") {
-      filtered = filtered.filter((booking) => booking.confirmed);
-    } else if (filterStatus.value === "pending") {
-      filtered = filtered.filter((booking) => !booking.confirmed);
-    }
+    filtered = filtered.filter(
+      (booking) => booking.status === filterStatus.value
+    );
   }
 
   if (filterPayment.value) {
@@ -340,11 +418,27 @@ const filteredBookings = computed(() => {
   return filtered;
 });
 
+// Computed bookings with guest data
+const bookingsWithGuests = computed(() => {
+  return filteredBookings.value.map((booking) => {
+    const guest = guests.value.find((g) => g.id === booking.guest_id);
+    return {
+      ...booking,
+      guest,
+    };
+  });
+});
+
 // Methods
 const loadBookings = async () => {
   loading.value = true;
   try {
-    bookings.value = await BookingService.getAll();
+    const [bookingsData, guestsData] = await Promise.all([
+      BookingService.getAll(),
+      GuestService.getAll(),
+    ]);
+    bookings.value = bookingsData;
+    guests.value = guestsData;
   } catch (error) {
     console.error("Error loading bookings:", error);
     showSnackbar("Error loading bookings", "error");
@@ -378,16 +472,32 @@ const calculateNights = (checkIn: string, checkOut: string) => {
   return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 };
 
-const getStatusText = (booking: Booking) => {
-  if (booking.paid) return "Completed";
-  if (booking.confirmed) return "Confirmed";
-  return "Pending";
+const getStatusText = (status: string) => {
+  const statusMap: Record<string, string> = {
+    new: "New",
+    confirmed: "Confirmed",
+    kurkarten_requested: "Kurkarten Requested",
+    ready_for_arrival: "Ready for Arrival",
+    arriving: "Arriving",
+    on_site: "On Site",
+    departing: "Departing",
+    departed_readings_due: "Readings Due",
+  };
+  return statusMap[status] || "Unknown";
 };
 
-const getStatusColor = (booking: Booking) => {
-  if (booking.paid) return "success";
-  if (booking.confirmed) return "primary";
-  return "warning";
+const getStatusColor = (status: string) => {
+  const colorMap: Record<string, string> = {
+    new: "warning",
+    confirmed: "primary",
+    kurkarten_requested: "info",
+    ready_for_arrival: "success",
+    arriving: "purple",
+    on_site: "green",
+    departing: "orange",
+    departed_readings_due: "error",
+  };
+  return colorMap[status] || "grey";
 };
 
 const viewBooking = (id: number) => {
@@ -401,7 +511,7 @@ const editBooking = (id: number) => {
 const confirmBooking = async (booking: Booking) => {
   try {
     await BookingService.confirm(booking.id);
-    booking.confirmed = true;
+    booking.status = "confirmed";
     showSnackbar("Booking confirmed successfully", "success");
   } catch (error) {
     console.error("Error confirming booking:", error);
@@ -431,7 +541,7 @@ const sendPreArrivalEmail = async (id: number) => {
 
 const generateInvoice = async (id: number) => {
   try {
-    await BookingService.generateInvoice(id);
+    await BookingService.createInvoice(id);
     showSnackbar("Invoice generated and sent successfully", "success");
   } catch (error) {
     console.error("Error generating invoice:", error);

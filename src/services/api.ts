@@ -99,6 +99,15 @@ export interface Booking {
   guest?: Guest;
   check_in: string;
   check_out: string;
+  status:
+    | "new"
+    | "confirmed"
+    | "kurkarten_requested"
+    | "ready_for_arrival"
+    | "arriving"
+    | "on_site"
+    | "departing"
+    | "departed_readings_due";
   confirmed: boolean;
   final_info_sent: boolean;
   invoice_created: boolean;
@@ -167,6 +176,38 @@ export interface UnitPrice {
   description?: string;
   created_at: string;
   modified_at: string;
+}
+
+export interface PendingEmail {
+  id: number;
+  booking_id: number;
+  email_type:
+    | "booking_confirmation"
+    | "kurkarten_request"
+    | "pre_arrival_info"
+    | "invoice_generation"
+    | "missing_readings_reminder";
+}
+
+export interface PendingEmailsResponse {
+  total_count: number;
+  emails: PendingEmail[];
+}
+
+export interface OutstandingGuestAction {
+  id: number;
+  booking_id: number;
+  action_type:
+    | "payment_required"
+    | "registration_incomplete"
+    | "confirmation_pending"
+    | "document_missing"
+    | "feedback_requested";
+}
+
+export interface OutstandingGuestActionsResponse {
+  total_count: number;
+  actions: OutstandingGuestAction[];
 }
 
 // API Service Classes
@@ -406,6 +447,18 @@ export class AdminService {
     description?: string;
   }): Promise<UnitPrice> {
     const response = await api.post("/admin/unit-prices/firewood", data);
+    return response.data;
+  }
+}
+
+export class AlertService {
+  static async getPendingEmails(): Promise<PendingEmailsResponse> {
+    const response = await api.get("/alerts/pending-emails");
+    return response.data;
+  }
+
+  static async getOutstandingGuestActions(): Promise<OutstandingGuestActionsResponse> {
+    const response = await api.get("/alerts/outstanding-guest-actions");
     return response.data;
   }
 }

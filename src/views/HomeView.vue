@@ -63,6 +63,27 @@
       </v-col>
     </v-row>
 
+    <!-- Email Alerts -->
+    <v-row class="mb-6">
+      <v-col cols="12">
+        <EmailAlerts />
+      </v-col>
+    </v-row>
+
+    <!-- Outstanding Guest Actions -->
+    <v-row class="mb-6">
+      <v-col cols="12">
+        <GuestActions />
+      </v-col>
+    </v-row>
+
+    <!-- Availability Calendar -->
+    <v-row class="mb-6">
+      <v-col cols="12">
+        <AvailabilityCalendar />
+      </v-col>
+    </v-row>
+
     <!-- Recent Activities and Quick Actions -->
     <v-row>
       <v-col cols="12" md="8">
@@ -195,6 +216,9 @@
 
 <script setup lang="ts">
 import { useRouter } from "vue-router";
+import EmailAlerts from "@/components/EmailAlerts.vue";
+import GuestActions from "@/components/GuestActions.vue";
+import AvailabilityCalendar from "@/components/AvailabilityCalendar.vue";
 
 const router = useRouter();
 

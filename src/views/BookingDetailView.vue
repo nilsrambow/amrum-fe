@@ -26,7 +26,7 @@
               Edit Booking
             </v-btn>
             <v-btn
-              v-if="!booking.confirmed"
+              v-if="booking.status === 'new'"
               color="success"
               prepend-icon="mdi-check"
               @click="confirmBooking"
@@ -66,13 +66,26 @@
       </v-col>
     </v-row>
 
+    <!-- Booking-Specific Alerts -->
+    <v-row class="mb-6">
+      <v-col cols="12">
+        <BookingAlerts :booking-id="booking.id" />
+      </v-col>
+    </v-row>
+
     <!-- Status Cards -->
     <v-row class="mb-6">
       <v-col cols="6" sm="3">
-        <v-card class="text-center pa-4" :color="getStatusColor(booking)" dark>
-          <v-icon size="32" class="mb-2">{{ getStatusIcon(booking) }}</v-icon>
+        <v-card
+          class="text-center pa-4"
+          :color="getStatusColor(booking.status)"
+          dark
+        >
+          <v-icon size="32" class="mb-2">{{
+            getStatusIcon(booking.status)
+          }}</v-icon>
           <div class="text-h6 font-weight-bold">
-            {{ getStatusText(booking) }}
+            {{ getStatusText(booking.status) }}
           </div>
           <div class="text-caption">Status</div>
         </v-card>
@@ -521,13 +534,19 @@
           <v-card-text>
             <v-btn
               block
-              :color="booking.confirmed ? 'grey' : 'success'"
-              :variant="booking.confirmed ? 'outlined' : 'elevated'"
+              :color="booking.status === 'confirmed' ? 'grey' : 'success'"
+              :variant="
+                booking.status === 'confirmed' ? 'outlined' : 'elevated'
+              "
               class="mb-2"
               prepend-icon="mdi-check"
               @click="confirmBooking"
             >
-              {{ booking.confirmed ? "Booking Confirmed" : "Confirm Booking" }}
+              {{
+                booking.status === "confirmed"
+                  ? "Booking Confirmed"
+                  : "Confirm Booking"
+              }}
             </v-btn>
 
             <v-btn
@@ -987,7 +1006,9 @@ import {
   AdminService,
   type Booking,
   type Guest,
+  type MeterReading,
 } from "@/services/api";
+import BookingAlerts from "@/components/BookingAlerts.vue";
 
 const router = useRouter();
 const route = useRoute();
@@ -1145,22 +1166,46 @@ const formatCurrency = (amount: number) => {
   }).format(amount);
 };
 
-const getStatusText = (booking: Booking) => {
-  if (booking.paid) return "Completed";
-  if (booking.confirmed) return "Confirmed";
-  return "Pending";
+const getStatusText = (status: string) => {
+  const statusMap: Record<string, string> = {
+    new: "New",
+    confirmed: "Confirmed",
+    kurkarten_requested: "Kurkarten Requested",
+    ready_for_arrival: "Ready for Arrival",
+    arriving: "Arriving",
+    on_site: "On Site",
+    departing: "Departing",
+    departed_readings_due: "Readings Due",
+  };
+  return statusMap[status] || "Unknown";
 };
 
-const getStatusColor = (booking: Booking) => {
-  if (booking.paid) return "success";
-  if (booking.confirmed) return "primary";
-  return "warning";
+const getStatusColor = (status: string) => {
+  const colorMap: Record<string, string> = {
+    new: "warning",
+    confirmed: "primary",
+    kurkarten_requested: "info",
+    ready_for_arrival: "success",
+    arriving: "purple",
+    on_site: "green",
+    departing: "orange",
+    departed_readings_due: "error",
+  };
+  return colorMap[status] || "grey";
 };
 
-const getStatusIcon = (booking: Booking) => {
-  if (booking.paid) return "mdi-check-circle";
-  if (booking.confirmed) return "mdi-calendar-check";
-  return "mdi-clock-outline";
+const getStatusIcon = (status: string) => {
+  const iconMap: Record<string, string> = {
+    new: "mdi-calendar-plus",
+    confirmed: "mdi-calendar-check",
+    kurkarten_requested: "mdi-card-account-details",
+    ready_for_arrival: "mdi-calendar-clock",
+    arriving: "mdi-car",
+    on_site: "mdi-home",
+    departing: "mdi-car-side",
+    departed_readings_due: "mdi-gauge-empty",
+  };
+  return iconMap[status] || "mdi-help-circle";
 };
 
 const confirmBooking = async () => {
@@ -1168,7 +1213,7 @@ const confirmBooking = async () => {
 
   try {
     await BookingService.confirm(booking.value.id);
-    booking.value.confirmed = true;
+    booking.value.status = "confirmed";
     showSnackbar("Booking confirmed successfully", "success");
   } catch (error) {
     console.error("Error confirming booking:", error);

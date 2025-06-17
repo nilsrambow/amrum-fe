@@ -411,21 +411,45 @@ const calculateNights = (checkIn: string, checkOut: string) => {
 };
 
 const getBookingStatus = (booking: Booking) => {
-  if (booking.paid) return "Paid";
-  if (booking.confirmed) return "Confirmed";
-  return "Pending";
+  const statusMap: Record<string, string> = {
+    new: "New",
+    confirmed: "Confirmed",
+    kurkarten_requested: "Kurkarten Requested",
+    ready_for_arrival: "Ready for Arrival",
+    arriving: "Arriving",
+    on_site: "On Site",
+    departing: "Departing",
+    departed_readings_due: "Readings Due",
+  };
+  return statusMap[booking.status] || "Unknown";
 };
 
 const getBookingColor = (booking: Booking) => {
-  if (booking.paid) return "success";
-  if (booking.confirmed) return "primary";
-  return "warning";
+  const colorMap: Record<string, string> = {
+    new: "warning",
+    confirmed: "primary",
+    kurkarten_requested: "info",
+    ready_for_arrival: "success",
+    arriving: "purple",
+    on_site: "green",
+    departing: "orange",
+    departed_readings_due: "error",
+  };
+  return colorMap[booking.status] || "grey";
 };
 
 const getBookingIcon = (booking: Booking) => {
-  if (booking.paid) return "mdi-check-circle";
-  if (booking.confirmed) return "mdi-calendar-check";
-  return "mdi-calendar-clock";
+  const iconMap: Record<string, string> = {
+    new: "mdi-calendar-plus",
+    confirmed: "mdi-calendar-check",
+    kurkarten_requested: "mdi-card-account-details",
+    ready_for_arrival: "mdi-calendar-clock",
+    arriving: "mdi-car",
+    on_site: "mdi-home",
+    departing: "mdi-car-side",
+    departed_readings_due: "mdi-gauge-empty",
+  };
+  return iconMap[booking.status] || "mdi-help-circle";
 };
 
 const confirmDelete = () => {
