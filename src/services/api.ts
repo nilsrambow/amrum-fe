@@ -1,7 +1,7 @@
 import axios from "axios";
 
 // API Configuration
-const API_BASE_URL = "http://amrum-be:8000";
+const API_BASE_URL = "http://homeserver.lan:8223";
 
 const api = axios.create({
   baseURL: API_BASE_URL,
