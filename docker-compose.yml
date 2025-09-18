@@ -1,0 +1,8 @@
+version: "3.9"
+services:
+  amrum-fe:
+    build: .
+    container_name: amrum-fe
+    ports:
+      - "8321:8080"
+    restart: unless-stopped
