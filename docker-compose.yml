@@ -5,7 +5,4 @@ services:
     container_name: amrum-fe
     ports:
       - "8321:8080"
-    volumes:
-      - ./:/app
-      - /app/node_modules
     restart: unless-stopped

@@ -1,7 +1,8 @@
 import axios from "axios";
 
 // API Configuration
-const API_BASE_URL = "http://localhost:8123";
+// TODO: Make this dynamic 
+const API_BASE_URL = "http://homeserver.lan:8223";
 
 const api = axios.create({
   baseURL: API_BASE_URL,
