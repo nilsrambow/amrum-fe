@@ -105,6 +105,30 @@
           <div class="text-caption">Readings Due</div>
         </v-card>
       </v-col>
+
+      <v-col cols="6" sm="3" md="2">
+        <v-card class="text-center pa-3" color="purple" dark>
+          <v-icon size="24" class="mb-1">mdi-file-document-outline</v-icon>
+          <div class="text-h6 font-weight-bold">{{ stats.invoiceDue }}</div>
+          <div class="text-caption">Invoice Due</div>
+        </v-card>
+      </v-col>
+
+      <v-col cols="6" sm="3" md="2">
+        <v-card class="text-center pa-3" color="deep-orange" dark>
+          <v-icon size="24" class="mb-1">mdi-cash-clock</v-icon>
+          <div class="text-h6 font-weight-bold">{{ stats.paymentDue }}</div>
+          <div class="text-caption">Payment Due</div>
+        </v-card>
+      </v-col>
+
+      <v-col cols="6" sm="3" md="2">
+        <v-card class="text-center pa-3" color="success" dark>
+          <v-icon size="24" class="mb-1">mdi-check-circle</v-icon>
+          <div class="text-h6 font-weight-bold">{{ stats.completed }}</div>
+          <div class="text-caption">Completed</div>
+        </v-card>
+      </v-col>
     </v-row>
 
     <!-- Search and Filters -->
@@ -356,6 +380,9 @@ const statusFilterOptions = [
   { title: "On Site", value: "on_site" },
   { title: "Departing", value: "departing" },
   { title: "Departed - Readings Due", value: "departed_readings_due" },
+  { title: "Departed - Invoice Due", value: "departed_invoice_due" },
+  { title: "Departed - Payment Due", value: "departed_payment_due" },
+  { title: "Departed - Completed", value: "departed_done" },
 ];
 
 const paymentFilterOptions = [
@@ -384,6 +411,15 @@ const stats = computed(() => {
   const readingsDue = bookings.value.filter(
     (b) => b.status === "departed_readings_due"
   ).length;
+  const invoiceDue = bookings.value.filter(
+    (b) => b.status === "departed_invoice_due"
+  ).length;
+  const paymentDue = bookings.value.filter(
+    (b) => b.status === "departed_payment_due"
+  ).length;
+  const completed = bookings.value.filter(
+    (b) => b.status === "departed_done"
+  ).length;
 
   return {
     newBookings,
@@ -394,6 +430,9 @@ const stats = computed(() => {
     onSite,
     departing,
     readingsDue,
+    invoiceDue,
+    paymentDue,
+    completed,
   };
 });
 
@@ -482,6 +521,9 @@ const getStatusText = (status: string) => {
     on_site: "On Site",
     departing: "Departing",
     departed_readings_due: "Readings Due",
+    departed_invoice_due: "Invoice Due",
+    departed_payment_due: "Payment Due",
+    departed_done: "Completed",
   };
   return statusMap[status] || "Unknown";
 };
@@ -496,6 +538,9 @@ const getStatusColor = (status: string) => {
     on_site: "green",
     departing: "orange",
     departed_readings_due: "error",
+    departed_invoice_due: "purple",
+    departed_payment_due: "deep-orange",
+    departed_done: "success",
   };
   return colorMap[status] || "grey";
 };

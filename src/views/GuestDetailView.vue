@@ -330,6 +330,7 @@ import { useRouter, useRoute } from "vue-router";
 import {
   GuestService,
   BookingService,
+  PaymentService,
   type Guest,
   type Booking,
   type Payment,
@@ -381,11 +382,17 @@ const loadGuestDetails = async () => {
     // Load guest
     guest.value = await GuestService.getById(guestId.value);
 
-    // Load bookings for this guest
+    // Load bookings for this guest (includes payments)
     bookings.value = await BookingService.getByGuest(guestId.value);
 
-    // Load payments (mock data for now)
-    payments.value = []; // TODO: Implement when API is ready
+    // Extract payments from bookings
+    const allPayments: Payment[] = [];
+    bookings.value.forEach((booking) => {
+      if (booking.payments && booking.payments.length > 0) {
+        allPayments.push(...booking.payments);
+      }
+    });
+    payments.value = allPayments;
   } catch (error) {
     console.error("Error loading guest details:", error);
     showSnackbar("Error loading guest details", "error");
@@ -420,6 +427,9 @@ const getBookingStatus = (booking: Booking) => {
     on_site: "On Site",
     departing: "Departing",
     departed_readings_due: "Readings Due",
+    departed_invoice_due: "Invoice Due",
+    departed_payment_due: "Payment Due",
+    departed_done: "Completed",
   };
   return statusMap[booking.status] || "Unknown";
 };
@@ -434,6 +444,9 @@ const getBookingColor = (booking: Booking) => {
     on_site: "green",
     departing: "orange",
     departed_readings_due: "error",
+    departed_invoice_due: "purple",
+    departed_payment_due: "deep-orange",
+    departed_done: "success",
   };
   return colorMap[booking.status] || "grey";
 };
@@ -448,6 +461,9 @@ const getBookingIcon = (booking: Booking) => {
     on_site: "mdi-home",
     departing: "mdi-car-side",
     departed_readings_due: "mdi-gauge-empty",
+    departed_invoice_due: "mdi-file-document-outline",
+    departed_payment_due: "mdi-cash-clock",
+    departed_done: "mdi-check-circle",
   };
   return iconMap[booking.status] || "mdi-help-circle";
 };

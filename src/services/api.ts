@@ -107,7 +107,10 @@ export interface Booking {
     | "arriving"
     | "on_site"
     | "departing"
-    | "departed_readings_due";
+    | "departed_readings_due"
+    | "departed_invoice_due"
+    | "departed_payment_due"
+    | "departed_done";
   confirmed: boolean;
   final_info_sent: boolean;
   invoice_created: boolean;
@@ -123,6 +126,7 @@ export interface Booking {
   invoice_created_date?: string;
   invoice_sent_date?: string;
   invoice_details?: InvoiceDetails;
+  access_token?: string;
   created_at: string;
   modified_at: string;
   meter_readings?: MeterReading;
@@ -210,6 +214,44 @@ export interface OutstandingGuestActionsResponse {
   actions: OutstandingGuestAction[];
 }
 
+export interface GuestPaymentResponse {
+  id: number;
+  booking_id: number;
+  amount: number;
+  payment_date: string;
+  payment_method: string | null;
+  reference: string | null;
+  notes: string | null;
+  created_at: string;
+  modified_at: string;
+}
+
+export interface GuestBookingResponse {
+  id: number;
+  check_in: string;
+  check_out: string;
+  confirmed: boolean;
+  status:
+    | "new"
+    | "confirmed"
+    | "kurkarten_requested"
+    | "ready_for_arrival"
+    | "arriving"
+    | "on_site"
+    | "departing"
+    | "departed_readings_due"
+    | "departed_invoice_due"
+    | "departed_payment_due"
+    | "departed_done";
+  kurtaxe_amount: number | null;
+  kurtaxe_notes: string | null;
+  created_at: string;
+  guest_name: string;
+  guest_email: string;
+  meter_readings: MeterReading | null;
+  payments: GuestPaymentResponse[] | null;
+}
+
 // API Service Classes
 export class BookingService {
   static async getAll(): Promise<Booking[]> {
@@ -219,6 +261,13 @@ export class BookingService {
 
   static async getById(id: number): Promise<Booking> {
     const response = await api.get(`/booking/${id}`);
+    return response.data;
+  }
+
+  static async getGuestBookingByToken(
+    token: string
+  ): Promise<GuestBookingResponse> {
+    const response = await api.get(`/guest/booking/${token}`);
     return response.data;
   }
 
@@ -320,6 +369,23 @@ export class BookingService {
     );
     return response.data;
   }
+
+  static async submitGuestReadings(
+    token: string,
+    readings: {
+      electricity_start?: number;
+      electricity_end?: number;
+      gas_start?: number;
+      gas_end?: number;
+      firewood_boxes?: number;
+    }
+  ): Promise<{ message: string }> {
+    const response = await api.post(
+      `/guest/booking/${token}/readings`,
+      readings
+    );
+    return response.data;
+  }
 }
 
 export class GuestService {
@@ -371,7 +437,7 @@ export class MeterService {
 
 export class PaymentService {
   static async getByBooking(bookingId: number): Promise<Payment[]> {
-    const response = await api.get(`/booking/${bookingId}/payments`);
+    const response = await api.get(`/booking/${bookingId}/payment`);
     return response.data;
   }
 
@@ -379,7 +445,7 @@ export class PaymentService {
     bookingId: number,
     payment: Omit<Payment, "id" | "booking_id" | "created_at" | "modified_at">
   ): Promise<Payment> {
-    const response = await api.post(`/booking/${bookingId}/payments`, payment);
+    const response = await api.post(`/booking/${bookingId}/payment`, payment);
     return response.data;
   }
 }

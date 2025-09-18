@@ -3,15 +3,6 @@
     <v-card-title>
       <v-icon class="mr-2" color="warning">mdi-email-alert</v-icon>
       Email Alerts
-      <v-spacer></v-spacer>
-      <v-chip
-        v-if="alertsData && alertsData.total_count > 0"
-        color="warning"
-        variant="elevated"
-        size="small"
-      >
-        {{ alertsData.total_count }}
-      </v-chip>
     </v-card-title>
     <v-divider></v-divider>
 
@@ -68,16 +59,16 @@
                   {{ getEmailTypeIcon(email.email_type) }}
                 </v-icon>
                 <span class="text-caption font-weight-medium">
-                  Booking #{{ email.booking_id }}
+                  {{ getEmailTypeLabel(email.email_type) }}
                 </span>
               </div>
 
               <div class="text-body-2 font-weight-medium mb-1">
-                {{ getEmailTypeLabel(email.email_type) }}
+                {{ getGuestName(email.booking_id) }}
               </div>
 
               <div class="text-caption text-medium-emphasis">
-                Click to view booking
+                {{ getBookingDates(email.booking_id) }}
               </div>
 
               <v-icon
@@ -99,13 +90,22 @@
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
-import { AlertService, type PendingEmailsResponse } from "@/services/api";
+import {
+  AlertService,
+  BookingService,
+  GuestService,
+  type PendingEmailsResponse,
+  type Booking,
+  type Guest,
+} from "@/services/api";
 
 const router = useRouter();
 
 const loading = ref(false);
 const error = ref(false);
 const alertsData = ref<PendingEmailsResponse | null>(null);
+const bookingDetails = ref<Map<number, Booking>>(new Map());
+const guestDetails = ref<Map<number, Guest>>(new Map());
 
 const loadAlerts = async () => {
   loading.value = true;
@@ -113,6 +113,33 @@ const loadAlerts = async () => {
 
   try {
     alertsData.value = await AlertService.getPendingEmails();
+
+    // Fetch booking details for each pending email
+    if (alertsData.value?.emails) {
+      await Promise.all(
+        alertsData.value.emails.map(async (email) => {
+          try {
+            const booking = await BookingService.getById(email.booking_id);
+            bookingDetails.value.set(email.booking_id, booking);
+
+            // If guest info is not included in booking, fetch it separately
+            if (!booking.guest && booking.guest_id) {
+              try {
+                const guest = await GuestService.getById(booking.guest_id);
+                guestDetails.value.set(booking.guest_id, guest);
+              } catch (guestErr) {
+                console.error(
+                  `Failed to load guest ${booking.guest_id}:`,
+                  guestErr
+                );
+              }
+            }
+          } catch (err) {
+            console.error(`Failed to load booking ${email.booking_id}:`, err);
+          }
+        })
+      );
+    }
   } catch (err) {
     console.error("Failed to load email alerts:", err);
     error.value = true;
@@ -123,6 +150,35 @@ const loadAlerts = async () => {
 
 const navigateToBooking = (bookingId: number) => {
   router.push({ name: "booking-detail", params: { id: bookingId } });
+};
+
+const getGuestName = (bookingId: number): string => {
+  const booking = bookingDetails.value.get(bookingId);
+  if (booking) {
+    // First try to get guest info from booking object
+    if (booking.guest) {
+      return `${booking.guest.first_name} ${booking.guest.last_name}`;
+    }
+
+    // If not available, try to get from separate guest details
+    if (booking.guest_id) {
+      const guest = guestDetails.value.get(booking.guest_id);
+      if (guest) {
+        return `${guest.first_name} ${guest.last_name}`;
+      }
+    }
+  }
+  return "Loading...";
+};
+
+const getBookingDates = (bookingId: number): string => {
+  const booking = bookingDetails.value.get(bookingId);
+  if (booking) {
+    const checkIn = new Date(booking.check_in).toLocaleDateString();
+    const checkOut = new Date(booking.check_out).toLocaleDateString();
+    return `${checkIn} - ${checkOut}`;
+  }
+  return "Loading...";
 };
 
 const getEmailTypeLabel = (emailType: string): string => {

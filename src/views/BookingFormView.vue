@@ -343,18 +343,14 @@
 
             <v-btn
               block
-              :color="currentBooking?.meter_readings ? 'grey' : 'orange'"
-              :variant="
-                currentBooking?.meter_readings ? 'outlined' : 'elevated'
-              "
+              :color="hasMeterReadings ? 'grey' : 'orange'"
+              :variant="hasMeterReadings ? 'outlined' : 'elevated'"
               class="mb-2"
               prepend-icon="mdi-gauge"
               @click="registerReadings"
             >
               {{
-                currentBooking?.meter_readings
-                  ? "Readings Registered"
-                  : "Register Readings"
+                hasMeterReadings ? "Readings Registered" : "Register Readings"
               }}
             </v-btn>
 
@@ -1302,6 +1298,11 @@ const sendKurkartenEmail = async () => {
   try {
     await BookingService.sendKurkartenEmail(parseInt(bookingId.value));
     showSnackbar("Kurkarten email sent successfully", "success");
+    // Update local state
+    if (currentBooking.value) {
+      currentBooking.value.kurkarten_email_sent = true;
+      currentBooking.value.kurkarten_email_sent_date = new Date().toISOString();
+    }
   } catch (error) {
     console.error("Error sending kurkarten email:", error);
     showSnackbar("Error sending kurkarten email", "error");
@@ -1314,6 +1315,12 @@ const sendPreArrivalEmail = async () => {
   try {
     await BookingService.sendPreArrivalEmail(parseInt(bookingId.value));
     showSnackbar("Pre-arrival email sent successfully", "success");
+    // Update local state
+    if (currentBooking.value) {
+      currentBooking.value.pre_arrival_email_sent = true;
+      currentBooking.value.pre_arrival_email_sent_date =
+        new Date().toISOString();
+    }
   } catch (error) {
     console.error("Error sending pre-arrival email:", error);
     showSnackbar("Error sending pre-arrival email", "error");
@@ -1635,6 +1642,18 @@ const saveMeterReadings = async () => {
       currentBooking.value.meter_readings = result;
     }
 
+    // Update booking status if it was "departed_readings_due"
+    if (currentBooking.value?.status === "departed_readings_due") {
+      try {
+        await BookingService.registerReadings(parseInt(bookingId.value));
+        // Reload the booking to get the updated status
+        await loadBooking();
+      } catch (error) {
+        console.error("Error updating booking status:", error);
+        // Don't show error to user as readings were saved successfully
+      }
+    }
+
     showSnackbar("Meter readings registered successfully", "success");
     closeMeterReadingsDialog();
   } catch (error) {
@@ -1838,4 +1857,17 @@ const paymentData = ref({
 });
 const paymentMethods = ["Cash", "Credit Card", "Bank Transfer", "PayPal"];
 const registeringPayment = ref(false);
+
+const hasMeterReadings = computed(() => {
+  if (!currentBooking.value?.meter_readings) return false;
+
+  const readings = currentBooking.value.meter_readings;
+  return (
+    readings.electricity_start !== undefined ||
+    readings.electricity_end !== undefined ||
+    readings.gas_start !== undefined ||
+    readings.gas_end !== undefined ||
+    readings.firewood_boxes !== undefined
+  );
+});
 </script>

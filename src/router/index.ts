@@ -68,6 +68,15 @@ const routes: Array<RouteRecordRaw> = [
     props: true,
   },
   {
+    path: "/guest/booking/:token",
+    name: "guest-booking",
+    component: () =>
+      import(
+        /* webpackChunkName: "guest-booking" */ "../views/GuestBookingView.vue"
+      ),
+    props: true,
+  },
+  {
     path: "/about",
     name: "about",
     // route level code-splitting

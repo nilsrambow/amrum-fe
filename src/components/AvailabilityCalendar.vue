@@ -54,22 +54,38 @@
         </div>
 
         <!-- Legend -->
-        <div class="d-flex justify-center mt-4">
-          <div class="d-flex align-center mr-6">
+        <div class="d-flex justify-center mt-4 flex-wrap">
+          <div class="d-flex align-center mr-6 mb-2">
             <div class="legend-item free"></div>
             <span class="ml-2 text-caption">Free</span>
           </div>
-          <div class="d-flex align-center mr-6">
+          <div class="d-flex align-center mr-6 mb-2">
             <div class="legend-item reserved"></div>
             <span class="ml-2 text-caption">Reserved (New)</span>
           </div>
-          <div class="d-flex align-center mr-6">
+          <div class="d-flex align-center mr-6 mb-2">
             <div class="legend-item occupied"></div>
             <span class="ml-2 text-caption">Occupied</span>
           </div>
-          <div class="d-flex align-center">
-            <div class="legend-item diagonal-split-example"></div>
-            <span class="ml-2 text-caption">Arrival/Departure</span>
+          <div class="d-flex align-center mr-6 mb-2">
+            <div class="legend-item reserved-reserved"></div>
+            <span class="ml-2 text-caption">Reserved → Reserved</span>
+          </div>
+          <div class="d-flex align-center mr-6 mb-2">
+            <div class="legend-item reserved-occupied"></div>
+            <span class="ml-2 text-caption">Reserved → Occupied</span>
+          </div>
+          <div class="d-flex align-center mr-6 mb-2">
+            <div class="legend-item occupied-reserved"></div>
+            <span class="ml-2 text-caption">Occupied → Reserved</span>
+          </div>
+          <div class="d-flex align-center mr-6 mb-2">
+            <div class="legend-item occupied-occupied"></div>
+            <span class="ml-2 text-caption">Occupied → Occupied</span>
+          </div>
+          <div class="d-flex align-center mr-6 mb-2">
+            <div class="legend-item diagonal-line"></div>
+            <span class="ml-2 text-caption">Guest Change</span>
           </div>
         </div>
       </div>
@@ -93,6 +109,8 @@ interface CalendarDay {
   booking?: Booking;
   isArrival: boolean;
   isDeparture: boolean;
+  departingBooking?: Booking;
+  arrivingBooking?: Booking;
 }
 
 const currentDate = ref(new Date());
@@ -162,35 +180,81 @@ const calendarDays = computed(() => {
 
     const dateString = formatDateString(date);
 
-    // Find booking for this date using string comparison to avoid timezone issues
-    const booking = bookings.value.find((b) => {
+    // Find all bookings for this date
+    const bookingsForDate = bookings.value.filter((b) => {
       // Convert API date strings to local date strings for comparison
       const checkInString = apiDateToLocalString(b.check_in);
       const checkOutString = apiDateToLocalString(b.check_out);
       return dateString >= checkInString && dateString <= checkOutString;
     });
 
-    // Add guest data to booking if not already present
-    const bookingWithGuest = booking
+    // Determine if this is an arrival or departure day across all bookings
+    let isArrival = false;
+    let isDeparture = false;
+    let primaryBooking: Booking | undefined;
+    let departingBooking: Booking | undefined;
+    let arrivingBooking: Booking | undefined;
+
+    for (const booking of bookingsForDate) {
+      const checkInString = apiDateToLocalString(booking.check_in);
+      const checkOutString = apiDateToLocalString(booking.check_out);
+
+      if (dateString === checkInString) {
+        isArrival = true;
+        arrivingBooking = booking;
+      }
+      if (dateString === checkOutString) {
+        isDeparture = true;
+        departingBooking = booking;
+      }
+
+      // Use the first booking as primary for display purposes
+      if (!primaryBooking) {
+        primaryBooking = booking;
+      }
+    }
+
+    // Add guest data to bookings if not already present
+    const bookingWithGuest = primaryBooking
       ? {
-          ...booking,
+          ...primaryBooking,
           guest:
-            booking.guest ||
-            guests.value.find((g) => g.id === booking.guest_id),
+            primaryBooking.guest ||
+            guests.value.find((g) => g.id === primaryBooking!.guest_id),
         }
       : undefined;
 
-    // Determine if this is an arrival or departure day
-    const isArrival = bookingWithGuest?.check_in === dateString;
-    const isDeparture = bookingWithGuest?.check_out === dateString;
+    const departingBookingWithGuest = departingBooking
+      ? {
+          ...departingBooking,
+          guest:
+            departingBooking.guest ||
+            guests.value.find((g) => g.id === departingBooking!.guest_id),
+        }
+      : undefined;
+
+    const arrivingBookingWithGuest = arrivingBooking
+      ? {
+          ...arrivingBooking,
+          guest:
+            arrivingBooking.guest ||
+            guests.value.find((g) => g.id === arrivingBooking!.guest_id),
+        }
+      : undefined;
+
+    // For arrival/departure days, use the departing booking as primary if no primary booking exists
+    const finalBooking =
+      bookingWithGuest || departingBookingWithGuest || arrivingBookingWithGuest;
 
     days.push({
       date: dateString,
       dayNumber: date.getDate(),
       isCurrentMonth: date.getMonth() === month,
-      booking: bookingWithGuest,
+      booking: finalBooking,
       isArrival,
       isDeparture,
+      departingBooking: departingBookingWithGuest,
+      arrivingBooking: arrivingBookingWithGuest,
     });
   }
 
@@ -233,7 +297,23 @@ const getDayClasses = (day: CalendarDay) => {
     classes.push("other-month");
   }
 
-  if (day.booking) {
+  // Handle arrival/departure days first
+  if (day.isArrival && day.isDeparture) {
+    // Determine the color combination based on departing and arriving booking statuses
+    const departingStatus = day.departingBooking?.status;
+    const arrivingStatus = day.arrivingBooking?.status;
+
+    if (departingStatus === "new" && arrivingStatus === "new") {
+      classes.push("reserved-reserved");
+    } else if (departingStatus === "new" && arrivingStatus !== "new") {
+      classes.push("reserved-occupied");
+    } else if (departingStatus !== "new" && arrivingStatus === "new") {
+      classes.push("occupied-reserved");
+    } else {
+      classes.push("occupied-occupied");
+    }
+  } else if (day.booking) {
+    // Handle regular booking days
     if (day.booking.status === "new") {
       classes.push("reserved");
     } else {
@@ -243,8 +323,7 @@ const getDayClasses = (day: CalendarDay) => {
     // Add arrival/departure classes
     if (day.isArrival) {
       classes.push("arrival-day");
-    }
-    if (day.isDeparture) {
+    } else if (day.isDeparture) {
       classes.push("departure-day");
     }
   } else {
@@ -322,6 +401,26 @@ onMounted(() => {
     #e3f2fd 50%,
     #e3f2fd 100%
   );
+  position: relative;
+}
+
+.calendar-day.reserved.arrival-day::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    135deg,
+    transparent 0%,
+    transparent 48%,
+    #1976d2 49%,
+    #1976d2 51%,
+    transparent 52%,
+    transparent 100%
+  );
+  pointer-events: none;
 }
 
 .calendar-day.reserved.departure-day {
@@ -342,6 +441,26 @@ onMounted(() => {
     #ffebee 50%,
     #ffebee 100%
   );
+  position: relative;
+}
+
+.calendar-day.occupied.arrival-day::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    135deg,
+    transparent 0%,
+    transparent 48%,
+    #d32f2f 49%,
+    #d32f2f 51%,
+    transparent 52%,
+    transparent 100%
+  );
+  pointer-events: none;
 }
 
 .calendar-day.occupied.departure-day {
@@ -352,6 +471,186 @@ onMounted(() => {
     white 50%,
     white 100%
   );
+}
+
+.calendar-day.reserved.arrival-departure-day {
+  background: linear-gradient(
+    135deg,
+    #e3f2fd 0%,
+    #e3f2fd 49%,
+    white 50%,
+    white 100%
+  );
+}
+
+.calendar-day.occupied.arrival-departure-day {
+  background: linear-gradient(
+    135deg,
+    #ffebee 0%,
+    #ffebee 49%,
+    white 50%,
+    white 100%
+  );
+}
+
+.calendar-day.reserved.reserved-reserved {
+  background: linear-gradient(
+    135deg,
+    #e3f2fd 0%,
+    #e3f2fd 49%,
+    #e3f2fd 50%,
+    #e3f2fd 100%
+  );
+}
+
+.calendar-day.reserved.reserved-occupied {
+  background: linear-gradient(
+    135deg,
+    #e3f2fd 0%,
+    #e3f2fd 49%,
+    #ffebee 50%,
+    #ffebee 100%
+  );
+}
+
+.calendar-day.occupied.occupied-reserved {
+  background: linear-gradient(
+    135deg,
+    #ffebee 0%,
+    #ffebee 49%,
+    #e3f2fd 50%,
+    #e3f2fd 100%
+  );
+}
+
+.calendar-day.occupied.occupied-occupied {
+  background: linear-gradient(
+    135deg,
+    #ffebee 0%,
+    #ffebee 49%,
+    #ffebee 50%,
+    #ffebee 100%
+  );
+}
+
+.calendar-day.reserved-reserved {
+  background: linear-gradient(
+    135deg,
+    #e3f2fd 0%,
+    #e3f2fd 49%,
+    #e3f2fd 50%,
+    #e3f2fd 100%
+  );
+  position: relative;
+}
+
+.calendar-day.reserved-reserved::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    135deg,
+    transparent 0%,
+    transparent 48%,
+    #1976d2 49%,
+    #1976d2 51%,
+    transparent 52%,
+    transparent 100%
+  );
+  pointer-events: none;
+}
+
+.calendar-day.reserved-occupied {
+  background: linear-gradient(
+    135deg,
+    #e3f2fd 0%,
+    #e3f2fd 49%,
+    #ffebee 50%,
+    #ffebee 100%
+  );
+  position: relative;
+}
+
+.calendar-day.reserved-occupied::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    135deg,
+    transparent 0%,
+    transparent 48%,
+    #d32f2f 49%,
+    #d32f2f 51%,
+    transparent 52%,
+    transparent 100%
+  );
+  pointer-events: none;
+}
+
+.calendar-day.occupied-reserved {
+  background: linear-gradient(
+    135deg,
+    #ffebee 0%,
+    #ffebee 49%,
+    #e3f2fd 50%,
+    #e3f2fd 100%
+  );
+  position: relative;
+}
+
+.calendar-day.occupied-reserved::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    135deg,
+    transparent 0%,
+    transparent 48%,
+    #1976d2 49%,
+    #1976d2 51%,
+    transparent 52%,
+    transparent 100%
+  );
+  pointer-events: none;
+}
+
+.calendar-day.occupied-occupied {
+  background: linear-gradient(
+    135deg,
+    #ffebee 0%,
+    #ffebee 49%,
+    #ffebee 50%,
+    #ffebee 100%
+  );
+  position: relative;
+}
+
+.calendar-day.occupied-occupied::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    135deg,
+    transparent 0%,
+    transparent 48%,
+    #d32f2f 49%,
+    #d32f2f 51%,
+    transparent 52%,
+    transparent 100%
+  );
+  pointer-events: none;
 }
 
 .day-number {
@@ -380,7 +679,7 @@ onMounted(() => {
   border-left: 4px solid #f44336;
 }
 
-.legend-item.diagonal-split-example {
+.legend-item.arrival-departure {
   background: linear-gradient(
     135deg,
     #ffebee 0%,
@@ -389,5 +688,80 @@ onMounted(() => {
     white 100%
   );
   border-left: 4px solid #f44336;
+}
+
+.legend-item.reserved-reserved {
+  background: linear-gradient(
+    135deg,
+    #e3f2fd 0%,
+    #e3f2fd 49%,
+    #e3f2fd 50%,
+    #e3f2fd 100%
+  );
+  border-left: 4px solid #2196f3;
+}
+
+.legend-item.reserved-occupied {
+  background: linear-gradient(
+    135deg,
+    #e3f2fd 0%,
+    #e3f2fd 49%,
+    #ffebee 50%,
+    #ffebee 100%
+  );
+  border-left: 4px solid #2196f3;
+}
+
+.legend-item.occupied-reserved {
+  background: linear-gradient(
+    135deg,
+    #ffebee 0%,
+    #ffebee 49%,
+    #e3f2fd 50%,
+    #e3f2fd 100%
+  );
+  border-left: 4px solid #f44336;
+}
+
+.legend-item.occupied-occupied {
+  background: linear-gradient(
+    135deg,
+    #ffebee 0%,
+    #ffebee 49%,
+    #ffebee 50%,
+    #ffebee 100%
+  );
+  border-left: 4px solid #f44336;
+}
+
+.legend-item.diagonal-line {
+  background: linear-gradient(
+    135deg,
+    #ffebee 0%,
+    #ffebee 49%,
+    white 50%,
+    white 100%
+  );
+  border-left: 4px solid #f44336;
+  position: relative;
+}
+
+.legend-item.diagonal-line::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    135deg,
+    transparent 0%,
+    transparent 48%,
+    #d32f2f 49%,
+    #d32f2f 51%,
+    transparent 52%,
+    transparent 100%
+  );
+  pointer-events: none;
 }
 </style>

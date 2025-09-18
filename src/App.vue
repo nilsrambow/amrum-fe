@@ -5,6 +5,7 @@
       app
       :rail="rail"
       @click="rail = false"
+      v-if="!isGuestRoute"
     >
       <v-list-item
         prepend-avatar="https://via.placeholder.com/40"
@@ -77,7 +78,7 @@
       </v-list>
     </v-navigation-drawer>
 
-    <v-app-bar app>
+    <v-app-bar app v-if="!isGuestRoute">
       <v-app-bar-nav-icon @click="drawer = !drawer"></v-app-bar-nav-icon>
 
       <v-app-bar-title>
@@ -119,10 +120,18 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref, computed } from "vue";
+import { useRoute } from "vue-router";
 
 const drawer = ref(true);
 const rail = ref(false);
+
+const route = useRoute();
+
+// Check if current route is a guest route
+const isGuestRoute = computed(() => {
+  return route.name === "guest-booking";
+});
 </script>
 
 <style>

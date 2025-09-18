@@ -3,15 +3,6 @@
     <v-card-title>
       <v-icon class="mr-2" color="error">mdi-account-alert</v-icon>
       Outstanding Guest Actions
-      <v-spacer></v-spacer>
-      <v-chip
-        v-if="actionsData && actionsData.total_count > 0"
-        color="error"
-        variant="elevated"
-        size="small"
-      >
-        {{ actionsData.total_count }}
-      </v-chip>
     </v-card-title>
     <v-divider></v-divider>
 
@@ -68,16 +59,16 @@
                   {{ getActionTypeIcon(action.action_type) }}
                 </v-icon>
                 <span class="text-caption font-weight-medium">
-                  Booking #{{ action.booking_id }}
+                  {{ getActionTypeLabel(action.action_type) }}
                 </span>
               </div>
 
               <div class="text-body-2 font-weight-medium mb-1">
-                {{ getActionTypeLabel(action.action_type) }}
+                {{ getGuestName(action.booking_id) }}
               </div>
 
               <div class="text-caption text-medium-emphasis">
-                Click to view booking
+                {{ getBookingDates(action.booking_id) }}
               </div>
 
               <v-icon
@@ -101,7 +92,11 @@ import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import {
   AlertService,
+  BookingService,
+  GuestService,
   type OutstandingGuestActionsResponse,
+  type Booking,
+  type Guest,
 } from "@/services/api";
 
 const router = useRouter();
@@ -109,6 +104,8 @@ const router = useRouter();
 const loading = ref(false);
 const error = ref(false);
 const actionsData = ref<OutstandingGuestActionsResponse | null>(null);
+const bookingDetails = ref<Map<number, Booking>>(new Map());
+const guestDetails = ref<Map<number, Guest>>(new Map());
 
 const loadActions = async () => {
   loading.value = true;
@@ -116,6 +113,33 @@ const loadActions = async () => {
 
   try {
     actionsData.value = await AlertService.getOutstandingGuestActions();
+
+    // Fetch booking details for each outstanding action
+    if (actionsData.value?.actions) {
+      await Promise.all(
+        actionsData.value.actions.map(async (action) => {
+          try {
+            const booking = await BookingService.getById(action.booking_id);
+            bookingDetails.value.set(action.booking_id, booking);
+
+            // If guest info is not included in booking, fetch it separately
+            if (!booking.guest && booking.guest_id) {
+              try {
+                const guest = await GuestService.getById(booking.guest_id);
+                guestDetails.value.set(booking.guest_id, guest);
+              } catch (guestErr) {
+                console.error(
+                  `Failed to load guest ${booking.guest_id}:`,
+                  guestErr
+                );
+              }
+            }
+          } catch (err) {
+            console.error(`Failed to load booking ${action.booking_id}:`, err);
+          }
+        })
+      );
+    }
   } catch (err) {
     console.error("Failed to load guest actions:", err);
     error.value = true;
@@ -126,6 +150,35 @@ const loadActions = async () => {
 
 const navigateToBooking = (bookingId: number) => {
   router.push({ name: "booking-detail", params: { id: bookingId } });
+};
+
+const getGuestName = (bookingId: number): string => {
+  const booking = bookingDetails.value.get(bookingId);
+  if (booking) {
+    // First try to get guest info from booking object
+    if (booking.guest) {
+      return `${booking.guest.first_name} ${booking.guest.last_name}`;
+    }
+
+    // If not available, try to get from separate guest details
+    if (booking.guest_id) {
+      const guest = guestDetails.value.get(booking.guest_id);
+      if (guest) {
+        return `${guest.first_name} ${guest.last_name}`;
+      }
+    }
+  }
+  return "Loading...";
+};
+
+const getBookingDates = (bookingId: number): string => {
+  const booking = bookingDetails.value.get(bookingId);
+  if (booking) {
+    const checkIn = new Date(booking.check_in).toLocaleDateString();
+    const checkOut = new Date(booking.check_out).toLocaleDateString();
+    return `${checkIn} - ${checkOut}`;
+  }
+  return "Loading...";
 };
 
 const getActionTypeLabel = (actionType: string): string => {

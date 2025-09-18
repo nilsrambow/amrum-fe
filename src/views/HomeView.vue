@@ -86,65 +86,7 @@
 
     <!-- Recent Activities and Quick Actions -->
     <v-row>
-      <v-col cols="12" md="8">
-        <v-card>
-          <v-card-title>
-            <v-icon class="mr-2">mdi-clock-outline</v-icon>
-            Recent Activities
-          </v-card-title>
-          <v-divider></v-divider>
-
-          <v-list>
-            <v-list-item>
-              <template v-slot:prepend>
-                <v-avatar color="primary">
-                  <v-icon color="white">mdi-calendar-plus</v-icon>
-                </v-avatar>
-              </template>
-              <v-list-item-title>New booking confirmed</v-list-item-title>
-              <v-list-item-subtitle
-                >John Smith - June 15-22, 2024</v-list-item-subtitle
-              >
-            </v-list-item>
-
-            <v-list-item>
-              <template v-slot:prepend>
-                <v-avatar color="success">
-                  <v-icon color="white">mdi-cash</v-icon>
-                </v-avatar>
-              </template>
-              <v-list-item-title>Payment received</v-list-item-title>
-              <v-list-item-subtitle
-                >€750 from Maria Garcia</v-list-item-subtitle
-              >
-            </v-list-item>
-
-            <v-list-item>
-              <template v-slot:prepend>
-                <v-avatar color="warning">
-                  <v-icon color="white">mdi-email</v-icon>
-                </v-avatar>
-              </template>
-              <v-list-item-title>Pre-arrival email sent</v-list-item-title>
-              <v-list-item-subtitle
-                >To guest checking in tomorrow</v-list-item-subtitle
-              >
-            </v-list-item>
-
-            <v-list-item>
-              <template v-slot:prepend>
-                <v-avatar color="info">
-                  <v-icon color="white">mdi-gauge</v-icon>
-                </v-avatar>
-              </template>
-              <v-list-item-title>Meter reading updated</v-list-item-title>
-              <v-list-item-subtitle
-                >Electricity: 1,245 kWh</v-list-item-subtitle
-              >
-            </v-list-item>
-          </v-list>
-        </v-card>
-      </v-col>
+      <v-col cols="12" md="8"> </v-col>
 
       <v-col cols="12" md="4">
         <v-card class="mb-4">
@@ -172,41 +114,6 @@
             >
               Add Guest
             </v-btn>
-
-            <v-btn
-              block
-              color="warning"
-              class="mb-3"
-              prepend-icon="mdi-gauge-empty"
-              @click="recordReading"
-            >
-              Record Meter Reading
-            </v-btn>
-
-            <v-btn
-              block
-              color="info"
-              prepend-icon="mdi-file-document-plus"
-              @click="generateInvoice"
-            >
-              Generate Invoice
-            </v-btn>
-          </v-card-text>
-        </v-card>
-
-        <v-card>
-          <v-card-title>
-            <v-icon class="mr-2">mdi-calendar-today</v-icon>
-            Today's Schedule
-          </v-card-title>
-          <v-card-text>
-            <v-chip color="success" class="mb-2" prepend-icon="mdi-login">
-              1 Check-in
-            </v-chip>
-            <br />
-            <v-chip color="error" class="mb-2" prepend-icon="mdi-logout">
-              2 Check-outs
-            </v-chip>
           </v-card-text>
         </v-card>
       </v-col>
@@ -229,13 +136,5 @@ const newBooking = () => {
 
 const addGuest = () => {
   router.push("/guests/add");
-};
-
-const recordReading = () => {
-  console.log("Navigate to meter reading form");
-};
-
-const generateInvoice = () => {
-  console.log("Navigate to invoice generation");
 };
 </script>

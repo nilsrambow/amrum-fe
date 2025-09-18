@@ -279,6 +279,68 @@
           </v-card-text>
         </v-card>
 
+        <!-- Magic Link for Guest Access -->
+        <v-card class="mb-6" v-if="booking.access_token">
+          <v-card-title>
+            <v-icon class="mr-2">mdi-link-variant</v-icon>
+            Guest Access Link
+          </v-card-title>
+          <v-card-text>
+            <v-alert type="info" variant="tonal" class="mb-4">
+              <div class="text-subtitle-2 mb-2">Guest Access</div>
+              <div class="text-body-2">
+                Share this link with the guest to allow them to view their
+                booking details and submit meter readings.
+              </div>
+            </v-alert>
+
+            <div class="d-flex align-center">
+              <v-text-field
+                :model-value="magicLink"
+                label="Guest Access Link"
+                readonly
+                variant="outlined"
+                density="compact"
+                class="flex-grow-1 mr-2"
+                prepend-inner-icon="mdi-link"
+              ></v-text-field>
+              <v-btn
+                color="primary"
+                variant="outlined"
+                @click="copyMagicLink"
+                :loading="copyingLink"
+              >
+                <v-icon>mdi-content-copy</v-icon>
+                Copy
+              </v-btn>
+            </div>
+
+            <div class="mt-2 text-caption text-medium-emphasis">
+              <v-icon size="small" class="mr-1">mdi-information</v-icon>
+              This link allows guests to access their booking details and submit
+              meter readings.
+            </div>
+          </v-card-text>
+        </v-card>
+
+        <!-- No Magic Link Available -->
+        <v-card class="mb-6" v-else>
+          <v-card-title>
+            <v-icon class="mr-2">mdi-link-variant-off</v-icon>
+            Guest Access Link
+          </v-card-title>
+          <v-card-text>
+            <v-alert type="warning" variant="tonal" class="mb-4">
+              <div class="text-subtitle-2 mb-2">No Access Token Available</div>
+              <div class="text-body-2">
+                A guest access token has not been generated for this booking
+                yet. The backend needs to generate an access token before guests
+                can access their booking details.
+              </div>
+            </v-alert>
+          </v-card-text>
+        </v-card>
+
         <!-- Invoice Details -->
         <v-card v-if="booking.invoice_created" class="mb-6">
           <v-card-title>
@@ -598,16 +660,14 @@
 
             <v-btn
               block
-              :color="booking.meter_readings ? 'grey' : 'orange'"
-              :variant="booking.meter_readings ? 'outlined' : 'elevated'"
+              :color="hasMeterReadings ? 'grey' : 'orange'"
+              :variant="hasMeterReadings ? 'outlined' : 'elevated'"
               class="mb-2"
               prepend-icon="mdi-gauge"
               @click="registerReadings"
             >
               {{
-                booking.meter_readings
-                  ? "Readings Registered"
-                  : "Register Readings"
+                hasMeterReadings ? "Readings Registered" : "Register Readings"
               }}
             </v-btn>
 
@@ -1009,6 +1069,7 @@ import {
   type MeterReading,
 } from "@/services/api";
 import BookingAlerts from "@/components/BookingAlerts.vue";
+import { generateMagicLinkFromCurrentLocation } from "@/utils/magicLinkGenerator";
 
 const router = useRouter();
 const route = useRoute();
@@ -1059,6 +1120,7 @@ const paymentData = ref({
 });
 const paymentMethods = ["Cash", "Credit Card", "Bank Transfer", "PayPal"];
 const registeringPayment = ref(false);
+const copyingLink = ref(false);
 
 // Validation rules
 const amountRules = [
@@ -1086,6 +1148,24 @@ const totalPaid = computed(() => {
   return booking.value.payments.reduce(
     (sum, payment) => sum + payment.amount,
     0
+  );
+});
+
+const magicLink = computed(() => {
+  if (!booking.value?.access_token) return "";
+  return generateMagicLinkFromCurrentLocation(booking.value.access_token);
+});
+
+const hasMeterReadings = computed(() => {
+  if (!booking.value?.meter_readings) return false;
+
+  const readings = booking.value.meter_readings;
+  return (
+    readings.electricity_start !== undefined ||
+    readings.electricity_end !== undefined ||
+    readings.gas_start !== undefined ||
+    readings.gas_end !== undefined ||
+    readings.firewood_boxes !== undefined
   );
 });
 
@@ -1176,6 +1256,9 @@ const getStatusText = (status: string) => {
     on_site: "On Site",
     departing: "Departing",
     departed_readings_due: "Readings Due",
+    departed_invoice_due: "Invoice Due",
+    departed_payment_due: "Payment Due",
+    departed_done: "Completed",
   };
   return statusMap[status] || "Unknown";
 };
@@ -1190,6 +1273,9 @@ const getStatusColor = (status: string) => {
     on_site: "green",
     departing: "orange",
     departed_readings_due: "error",
+    departed_invoice_due: "purple",
+    departed_payment_due: "deep-orange",
+    departed_done: "success",
   };
   return colorMap[status] || "grey";
 };
@@ -1204,6 +1290,9 @@ const getStatusIcon = (status: string) => {
     on_site: "mdi-home",
     departing: "mdi-car-side",
     departed_readings_due: "mdi-gauge-empty",
+    departed_invoice_due: "mdi-file-document-outline",
+    departed_payment_due: "mdi-cash-clock",
+    departed_done: "mdi-check-circle",
   };
   return iconMap[status] || "mdi-help-circle";
 };
@@ -1335,6 +1424,18 @@ const saveMeterReadings = async () => {
     // Update the booking data locally with the result from the API
     booking.value.meter_readings = result;
 
+    // Update booking status if it was "departed_readings_due"
+    if (booking.value.status === "departed_readings_due") {
+      try {
+        await BookingService.registerReadings(booking.value.id);
+        // Reload the booking to get the updated status
+        await loadBookingDetails();
+      } catch (error) {
+        console.error("Error updating booking status:", error);
+        // Don't show error to user as readings were saved successfully
+      }
+    }
+
     showSnackbar("Meter readings registered successfully", "success");
     closeMeterReadingsDialog();
   } catch (error) {
@@ -1444,6 +1545,21 @@ const savePayment = async () => {
     showSnackbar("Error registering payment", "error");
   } finally {
     registeringPayment.value = false;
+  }
+};
+
+const copyMagicLink = async () => {
+  if (!magicLink.value) return;
+
+  copyingLink.value = true;
+  try {
+    await navigator.clipboard.writeText(magicLink.value);
+    showSnackbar("Guest access link copied to clipboard", "success");
+  } catch (error) {
+    console.error("Error copying link:", error);
+    showSnackbar("Error copying link", "error");
+  } finally {
+    copyingLink.value = false;
   }
 };
 
