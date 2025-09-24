@@ -1,23 +1,33 @@
 import { createRouter, createWebHashHistory, RouteRecordRaw } from "vue-router";
 import HomeView from "../views/HomeView.vue";
+import { useAuth } from "../composables/useAuth";
 
 const routes: Array<RouteRecordRaw> = [
+  {
+    path: "/login",
+    name: "login",
+    component: () =>
+      import(/* webpackChunkName: "login" */ "../views/LoginView.vue"),
+  },
   {
     path: "/",
     name: "home",
     component: HomeView,
+    meta: { requiresAuth: true },
   },
   {
     path: "/guests",
     name: "guests",
     component: () =>
       import(/* webpackChunkName: "guests" */ "../views/GuestsView.vue"),
+    meta: { requiresAuth: true },
   },
   {
     path: "/guests/add",
     name: "add-guest",
     component: () =>
       import(/* webpackChunkName: "guest-form" */ "../views/GuestFormView.vue"),
+    meta: { requiresAuth: true },
   },
   {
     path: "/guests/:id",
@@ -27,6 +37,7 @@ const routes: Array<RouteRecordRaw> = [
         /* webpackChunkName: "guest-detail" */ "../views/GuestDetailView.vue"
       ),
     props: true,
+    meta: { requiresAuth: true },
   },
   {
     path: "/guests/:id/edit",
@@ -34,12 +45,14 @@ const routes: Array<RouteRecordRaw> = [
     component: () =>
       import(/* webpackChunkName: "guest-form" */ "../views/GuestFormView.vue"),
     props: true,
+    meta: { requiresAuth: true },
   },
   {
     path: "/bookings",
     name: "bookings",
     component: () =>
       import(/* webpackChunkName: "bookings" */ "../views/BookingsView.vue"),
+    meta: { requiresAuth: true },
   },
   {
     path: "/bookings/add",
@@ -48,6 +61,7 @@ const routes: Array<RouteRecordRaw> = [
       import(
         /* webpackChunkName: "booking-form" */ "../views/BookingFormView.vue"
       ),
+    meta: { requiresAuth: true },
   },
   {
     path: "/bookings/:id",
@@ -57,6 +71,7 @@ const routes: Array<RouteRecordRaw> = [
         /* webpackChunkName: "booking-detail" */ "../views/BookingDetailView.vue"
       ),
     props: true,
+    meta: { requiresAuth: true },
   },
   {
     path: "/bookings/:id/edit",
@@ -66,6 +81,7 @@ const routes: Array<RouteRecordRaw> = [
         /* webpackChunkName: "booking-form" */ "../views/BookingFormView.vue"
       ),
     props: true,
+    meta: { requiresAuth: true },
   },
   {
     path: "/guest/booking/:token",
@@ -90,6 +106,21 @@ const routes: Array<RouteRecordRaw> = [
 const router = createRouter({
   history: createWebHashHistory(),
   routes,
+});
+
+// Authentication guard
+router.beforeEach((to, from, next) => {
+  const requiresAuth = to.matched.some(record => record.meta.requiresAuth);
+  const { checkAuth } = useAuth();
+  const isAuthenticated = checkAuth();
+
+  if (requiresAuth && !isAuthenticated) {
+    next('/login');
+  } else if (to.name === 'login' && isAuthenticated) {
+    next('/');
+  } else {
+    next();
+  }
 });
 
 export default router;
