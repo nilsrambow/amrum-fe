@@ -6,14 +6,10 @@ const isAuthenticated = ref(AuthService.isAuthenticated());
 
 export function useAuth() {
   const login = async (credentials: { username: string; password: string }) => {
-    try {
-      const response = await AuthService.login(credentials);
-      AuthService.setToken(response.access_token);
-      isAuthenticated.value = true;
-      return response;
-    } catch (error) {
-      throw error;
-    }
+    const response = await AuthService.login(credentials);
+    AuthService.setToken(response.access_token);
+    isAuthenticated.value = true;
+    return response;
   };
 
   const logout = () => {
