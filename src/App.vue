@@ -139,7 +139,7 @@ const isGuestRoute = computed(() => {
 // Handle logout
 const handleLogout = () => {
   logout();
-  router.push('/login');
+  router.push("/login");
 };
 </script>
 

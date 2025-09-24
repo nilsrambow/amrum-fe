@@ -110,14 +110,14 @@ const router = createRouter({
 
 // Authentication guard
 router.beforeEach((to, from, next) => {
-  const requiresAuth = to.matched.some(record => record.meta.requiresAuth);
+  const requiresAuth = to.matched.some((record) => record.meta.requiresAuth);
   const { checkAuth } = useAuth();
   const isAuthenticated = checkAuth();
 
   if (requiresAuth && !isAuthenticated) {
-    next('/login');
-  } else if (to.name === 'login' && isAuthenticated) {
-    next('/');
+    next("/login");
+  } else if (to.name === "login" && isAuthenticated) {
+    next("/");
   } else {
     next();
   }

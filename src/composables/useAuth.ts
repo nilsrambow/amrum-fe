@@ -1,5 +1,5 @@
-import { ref, computed } from 'vue';
-import { AuthService } from '../services/api';
+import { ref, computed } from "vue";
+import { AuthService } from "../services/api";
 
 // Global authentication state
 const isAuthenticated = ref(AuthService.isAuthenticated());
