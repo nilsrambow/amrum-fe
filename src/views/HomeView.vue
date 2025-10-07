@@ -86,6 +86,16 @@
       </v-col>
     </v-row>
 
+
+    <v-row class="mb-6">
+      <v-col cols="6">
+        <EmailAlerts />
+      </v-col>
+      <v-col cols="6">
+        <GuestActions />
+      </v-col>
+    </v-row>
+
     <!-- Availability Calendar -->
     <v-row class="mb-6">
       <v-col cols="12">
