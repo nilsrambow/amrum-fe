@@ -303,8 +303,8 @@ const snackbarColor = ref("success");
 // Table headers
 const headers = [
   { title: "Guest", key: "guest", sortable: false },
-  { title: "Dates", key: "dates", sortable: true },
-  { title: "Status", key: "status", sortable: true },
+  { title: "Dates", key: "dates", sortable: false },
+  { title: "Status", key: "status", sortable: false },
   // { title: "Created", key: "created_at", sortable: true },
   { title: "Actions", key: "actions", sortable: false, width: "140px" },
 ];
@@ -399,13 +399,20 @@ const filteredBookings = computed(() => {
 
 // Computed bookings with guest data
 const bookingsWithGuests = computed(() => {
-  return filteredBookings.value.map((booking) => {
-    const guest = guests.value.find((g) => g.id === booking.guest_id);
-    return {
-      ...booking,
-      guest,
-    };
-  });
+  return filteredBookings.value
+    .map((booking) => {
+      const guest = guests.value.find((g) => g.id === booking.guest_id);
+      return {
+        ...booking,
+        guest,
+      };
+    })
+    .sort((a, b) => {
+      // Sort by check-in date (arrival date) - earliest first
+      const dateA = new Date(a.check_in);
+      const dateB = new Date(b.check_in);
+      return dateA.getTime() - dateB.getTime();
+    });
 });
 
 // Methods
@@ -498,68 +505,6 @@ const viewBooking = (id: number) => {
 
 const editBooking = (id: number) => {
   router.push(`/bookings/${id}/edit`);
-};
-
-const confirmBooking = async (booking: Booking) => {
-  try {
-    await BookingService.confirm(booking.id);
-    booking.status = "confirmed";
-    showSnackbar("Booking confirmed successfully", "success");
-  } catch (error) {
-    console.error("Error confirming booking:", error);
-    showSnackbar("Error confirming booking", "error");
-  }
-};
-
-const sendKurkartenEmail = async (id: number) => {
-  try {
-    await BookingService.sendKurkartenEmail(id);
-    showSnackbar("Kurkarten email sent successfully", "success");
-  } catch (error) {
-    console.error("Error sending kurkarten email:", error);
-    showSnackbar("Error sending kurkarten email", "error");
-  }
-};
-
-const sendPreArrivalEmail = async (id: number) => {
-  try {
-    await BookingService.sendPreArrivalEmail(id);
-    showSnackbar("Pre-arrival email sent successfully", "success");
-  } catch (error) {
-    console.error("Error sending pre-arrival email:", error);
-    showSnackbar("Error sending pre-arrival email", "error");
-  }
-};
-
-const generateInvoice = async (id: number) => {
-  try {
-    await BookingService.createInvoice(id);
-    showSnackbar("Invoice generated and sent successfully", "success");
-  } catch (error) {
-    console.error("Error generating invoice:", error);
-    showSnackbar("Error generating invoice", "error");
-  }
-};
-
-const deleteBooking = async (booking: Booking) => {
-  if (
-    confirm(
-      `Are you sure you want to delete the booking for ${booking.guest?.first_name} ${booking.guest?.last_name}?`
-    )
-  ) {
-    try {
-      // TODO: Implement delete in BookingService
-      // await BookingService.delete(booking.id);
-
-      // For now, just remove from local array
-      bookings.value = bookings.value.filter((b) => b.id !== booking.id);
-
-      showSnackbar("Booking deleted successfully", "success");
-    } catch (error) {
-      console.error("Error deleting booking:", error);
-      showSnackbar("Error deleting booking", "error");
-    }
-  }
 };
 
 const showSnackbar = (text: string, color = "success") => {
