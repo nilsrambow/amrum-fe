@@ -25,42 +25,6 @@
             >
               Edit Booking
             </v-btn>
-            <v-btn
-              v-if="booking.status === 'new'"
-              color="success"
-              prepend-icon="mdi-check"
-              @click="confirmBooking"
-              class="mr-2"
-            >
-              Confirm
-            </v-btn>
-            <v-menu>
-              <template #activator="{ props }">
-                <v-btn
-                  v-bind="props"
-                  color="info"
-                  prepend-icon="mdi-dots-vertical"
-                  variant="outlined"
-                >
-                  Actions
-                </v-btn>
-              </template>
-              <v-list>
-                <v-list-item @click="sendKurkartenEmail">
-                  <v-list-item-title>Send Kurkarten Email</v-list-item-title>
-                </v-list-item>
-                <v-list-item @click="sendPreArrivalEmail">
-                  <v-list-item-title>Send Pre-arrival Email</v-list-item-title>
-                </v-list-item>
-                <v-list-item @click="generateInvoice">
-                  <v-list-item-title>Generate Invoice</v-list-item-title>
-                </v-list-item>
-                <v-divider></v-divider>
-                <v-list-item @click="deleteBooking" class="text-error">
-                  <v-list-item-title>Delete Booking</v-list-item-title>
-                </v-list-item>
-              </v-list>
-            </v-menu>
           </div>
         </div>
       </v-col>
@@ -728,51 +692,6 @@
             >
               Register Payment
             </v-btn>
-          </v-card-text>
-        </v-card>
-
-        <!-- Meter Readings -->
-        <v-card class="mb-4">
-          <v-card-title>
-            <v-icon class="mr-2">mdi-gauge</v-icon>
-            Meter Readings
-          </v-card-title>
-          <v-card-text>
-            <div v-if="booking.meter_readings">
-              <v-list density="compact">
-                <v-list-item
-                  v-if="booking.meter_readings.electricity_start !== null"
-                >
-                  <v-list-item-title>Electricity</v-list-item-title>
-                  <v-list-item-subtitle>
-                    {{ booking.meter_readings.electricity_start }} -
-                    {{ booking.meter_readings.electricity_end || "TBD" }} kWh
-                  </v-list-item-subtitle>
-                </v-list-item>
-
-                <v-list-item v-if="booking.meter_readings.gas_start !== null">
-                  <v-list-item-title>Gas</v-list-item-title>
-                  <v-list-item-subtitle>
-                    {{ booking.meter_readings.gas_start }} -
-                    {{ booking.meter_readings.gas_end || "TBD" }} m³
-                  </v-list-item-subtitle>
-                </v-list-item>
-
-                <v-list-item v-if="booking.meter_readings.firewood_boxes">
-                  <v-list-item-title>Firewood</v-list-item-title>
-                  <v-list-item-subtitle
-                    >{{
-                      booking.meter_readings.firewood_boxes
-                    }}
-                    boxes</v-list-item-subtitle
-                  >
-                </v-list-item>
-              </v-list>
-            </div>
-            <div v-else class="text-center text-medium-emphasis">
-              <v-icon size="48" class="mb-2">mdi-gauge-empty</v-icon>
-              <div>No meter readings recorded</div>
-            </div>
           </v-card-text>
         </v-card>
 
