@@ -26,6 +26,9 @@ RUN npm install
 # Copy the rest of the application code
 COPY . .
 
+# Run lint with --fix to automatically fix linting errors
+RUN npm run lint:fix
+
 # Expose port 
 EXPOSE 8080
 
