@@ -204,14 +204,36 @@
                     }}</v-list-item-subtitle>
                   </v-list-item>
 
-                  <v-list-item v-if="booking.kurtaxe_notes">
+                  <v-list-item v-if="booking.meter_readings?.electricity_start !== null">
                     <template #prepend>
-                      <v-icon>mdi-note-text</v-icon>
+                      <v-icon>mdi-lightning-bolt</v-icon>
                     </template>
-                    <v-list-item-title>Tax Notes</v-list-item-title>
-                    <v-list-item-subtitle>{{
-                      booking.kurtaxe_notes
-                    }}</v-list-item-subtitle>
+                    <v-list-item-title>Electricity</v-list-item-title>
+                    <v-list-item-subtitle>
+                      {{ ((booking.meter_readings?.electricity_end ?? 0) - (booking.meter_readings?.electricity_start ?? 0)) }} kWh 
+                      ({{ booking.meter_readings?.electricity_start }} kWh - {{ booking.meter_readings?.electricity_end || 'TBD' }} kWh)
+                    </v-list-item-subtitle>
+                  </v-list-item>
+
+                  <v-list-item v-if="booking.meter_readings?.gas_start !== null">
+                    <template #prepend>
+                      <v-icon>mdi-fire</v-icon>
+                    </template>
+                    <v-list-item-title>Gas</v-list-item-title>
+                    <v-list-item-subtitle>
+                      {{ ((booking.meter_readings?.gas_end ?? booking.meter_readings?.gas_start ?? 0) - (booking.meter_readings?.gas_start ?? 0)) }} m³ 
+                      ({{ booking.meter_readings?.gas_start }} m³ - {{ booking.meter_readings?.gas_end || 'TBD' }} m³)
+                    </v-list-item-subtitle>
+                  </v-list-item>
+
+                  <v-list-item v-if="booking.meter_readings?.firewood_boxes">
+                    <template #prepend>
+                      <v-icon>mdi-wood</v-icon>
+                    </template>
+                    <v-list-item-title>Firewood</v-list-item-title>
+                    <v-list-item-subtitle>
+                      {{ booking.meter_readings.firewood_boxes }} boxes
+                    </v-list-item-subtitle>
                   </v-list-item>
 
                   <v-list-item v-if="booking.invoice_id">
