@@ -2,7 +2,7 @@
   <v-card>
     <v-card-title>
       <v-icon class="mr-2" color="warning">mdi-email-alert</v-icon>
-      Email Alerts
+      Delayed outbound emails
     </v-card-title>
     <v-divider></v-divider>
 

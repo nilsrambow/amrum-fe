@@ -2,7 +2,7 @@
   <v-card>
     <v-card-title>
       <v-icon class="mr-2" color="error">mdi-account-alert</v-icon>
-      Outstanding Guest Actions
+      Outstanding Activities from Guests
     </v-card-title>
     <v-divider></v-divider>
 

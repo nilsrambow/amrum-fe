@@ -15,45 +15,60 @@
     <!-- Key Metrics Cards -->
     <v-row class="mb-6">
       <v-col cols="12" sm="6" md="4">
-        <v-card class="pa-4" color="primary" dark>
-          <div class="d-flex align-center">
-            <v-icon size="40" class="mr-4">mdi-calendar-check</v-icon>
-            <div>
-              <div class="text-h4 font-weight-bold">
-                {{ statsLoading ? '...' : statsData?.total_bookings || 0 }}
+        <v-tooltip location="top">
+          <template v-slot:activator="{ props }">
+            <v-card v-bind="props" class="pa-4" color="primary" dark>
+              <div class="d-flex align-center">
+                <v-icon size="40" class="mr-4">mdi-calendar-check</v-icon>
+                <div>
+                  <div class="text-h4 font-weight-bold">
+                    {{ statsLoading ? '...' : statsData?.total_bookings || 0 }}
+                  </div>
+                  <div class="text-subtitle-2">Bookings</div>
+                </div>
               </div>
-              <div class="text-subtitle-2">Bookings This Year</div>
-            </div>
-          </div>
-        </v-card>
+            </v-card>
+          </template>
+          <span>Total number of confirmed bookings for the current year</span>
+        </v-tooltip>
       </v-col>
 
       <v-col cols="12" sm="6" md="4">
-        <v-card class="pa-4" color="success" dark>
-          <div class="d-flex align-center">
-            <v-icon size="40" class="mr-4">mdi-cash-multiple</v-icon>
-            <div>
-              <div class="text-h4 font-weight-bold">
-                {{ statsLoading ? '...' : formatCurrency(statsData?.total_invoice_amount || 0) }}
+          <v-tooltip location="top">
+          <template v-slot:activator="{ props }">
+            <v-card v-bind="props" class="pa-4" color="success" dark>
+              <div class="d-flex align-center">
+                <v-icon size="40" class="mr-4">mdi-cash-multiple</v-icon>
+                <div>
+                  <div class="text-h4 font-weight-bold">
+                    {{ statsLoading ? '...' : formatCurrency(statsData?.total_invoice_amount || 0) }}
+                  </div>
+                  <div class="text-subtitle-2">Invoice Total</div>
+                </div>
               </div>
-              <div class="text-subtitle-2">Invoice Total This Year</div>
-            </div>
-          </div>
-        </v-card>
+            </v-card>
+          </template>
+          <span>Total revenue generated from all invoices in the current year</span>
+        </v-tooltip>
       </v-col>
 
       <v-col cols="12" sm="6" md="4">
-        <v-card class="pa-4" color="warning" dark>
-          <div class="d-flex align-center">
-            <v-icon size="40" class="mr-4">mdi-bed</v-icon>
-            <div>
-              <div class="text-h4 font-weight-bold">
-                {{ statsLoading ? '...' : statsData?.total_occupied_nights || 0 }}
+        <v-tooltip location="top">
+          <template v-slot:activator="{ props }">
+            <v-card v-bind="props" class="pa-4" color="warning" dark>
+              <div class="d-flex align-center">
+                <v-icon size="40" class="mr-4">mdi-bed</v-icon>
+                <div>
+                  <div class="text-h4 font-weight-bold">
+                    {{ statsLoading ? '...' : statsData?.total_occupied_nights || 0 }}
+                  </div>
+                  <div class="text-subtitle-2">Occupied Nights</div>
+                </div>
               </div>
-              <div class="text-subtitle-2">Occupied Nights This Year</div>
-            </div>
-          </div>
-        </v-card>
+            </v-card>
+          </template>
+          <span>Total number of nights your property is occupied this year</span>
+        </v-tooltip>
       </v-col>
     </v-row>
 
