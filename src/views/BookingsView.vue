@@ -182,6 +182,7 @@
         :items="bookingsWithGuests"
         :loading="loading"
         :search="search"
+        :custom-filter="customFilter"
         class="elevation-1"
         item-value="id"
       >
@@ -445,6 +446,34 @@ const clearFilters = () => {
   filterStatus.value = null;
   filterPayment.value = null;
   search.value = "";
+};
+
+const customFilter = (value: string, query: string, item: any) => {
+  if (!query) return true;
+  
+  const searchTerm = query.toLowerCase();
+  
+  // Search guest name
+  const guestName = `${item.guest?.first_name || ''} ${item.guest?.last_name || ''}`.toLowerCase();
+  if (guestName.includes(searchTerm)) return true;
+  
+  // Search formatted dates
+  const checkInFormatted = formatDate(item.check_in).toLowerCase();
+  const checkOutFormatted = formatDate(item.check_out).toLowerCase();
+  if (checkInFormatted.includes(searchTerm) || checkOutFormatted.includes(searchTerm)) return true;
+  
+  // Search status text
+  const statusText = getStatusText(item.status).toLowerCase();
+  if (statusText.includes(searchTerm)) return true;
+  
+  // Search created date
+  const createdFormatted = formatDate(item.created_at).toLowerCase();
+  if (createdFormatted.includes(searchTerm)) return true;
+  
+  // Search raw status value
+  if (item.status.toLowerCase().includes(searchTerm)) return true;
+  
+  return false;
 };
 
 const formatDate = (dateString: string) => {
