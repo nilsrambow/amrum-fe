@@ -6,3 +6,8 @@ services:
     ports:
       - "8321:8080"
     restart: unless-stopped
+    volumes:
+      - ./src:/app/src
+      - ./public:/app/public
+      - ./vue.config.js:/app/vue.config.js
+      - ./tsconfig.json:/app/tsconfig.json
