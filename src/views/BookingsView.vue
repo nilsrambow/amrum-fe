@@ -127,18 +127,9 @@
       </v-col>
     </v-row>
 
-    <!-- Search and Filters -->
+    <!-- Filters -->
     <v-row class="mb-4">
       <v-col cols="12" md="4">
-        <v-text-field
-          v-model="search"
-          label="Search bookings..."
-          prepend-inner-icon="mdi-magnify"
-          variant="outlined"
-          clearable
-        ></v-text-field>
-      </v-col>
-      <v-col cols="12" md="3">
         <v-select
           v-model="filterStatus"
           label="Status"
@@ -148,7 +139,7 @@
           @update:model-value="filterBookings"
         ></v-select>
       </v-col>
-      <v-col cols="12" md="3">
+      <v-col cols="12" md="4">
         <v-select
           v-model="filterPayment"
           label="Payment Status"
@@ -158,7 +149,7 @@
           @update:model-value="filterBookings"
         ></v-select>
       </v-col>
-      <v-col cols="12" md="2">
+      <v-col cols="12" md="4">
         <v-btn
           block
           variant="outlined"
@@ -181,7 +172,6 @@
         :headers="headers"
         :items="bookingsWithGuests"
         :loading="loading"
-        :search="search"
         class="elevation-1"
         item-value="id"
       >
@@ -304,7 +294,6 @@ const router = useRouter();
 const bookings = ref<Booking[]>([]);
 const guests = ref<Guest[]>([]);
 const loading = ref(false);
-const search = ref("");
 const filterStatus = ref<string | null>(null);
 const filterPayment = ref<string | null>(null);
 const snackbar = ref(false);
@@ -415,12 +404,6 @@ const bookingsWithGuests = computed(() => {
     return {
       ...booking,
       guest,
-      // Add searchable text fields for the built-in search
-      guestName: guest ? `${guest.first_name || ''} ${guest.last_name || ''}`.trim() : '',
-      checkInFormatted: formatDate(booking.check_in),
-      checkOutFormatted: formatDate(booking.check_out),
-      statusText: getStatusText(booking.status),
-      createdFormatted: formatDate(booking.created_at),
     };
   });
 });
@@ -450,7 +433,6 @@ const filterBookings = () => {
 const clearFilters = () => {
   filterStatus.value = null;
   filterPayment.value = null;
-  search.value = "";
 };
 
 
