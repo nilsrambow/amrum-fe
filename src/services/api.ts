@@ -218,6 +218,12 @@ export interface OutstandingGuestActionsResponse {
   actions: OutstandingGuestAction[];
 }
 
+export interface DashboardStatsResponse {
+  total_bookings: number;
+  total_invoice_amount: number;
+  total_occupied_nights: number;
+}
+
 export interface LoginRequest {
   username: string;
   password: string;
@@ -539,6 +545,13 @@ export class AlertService {
 
   static async getOutstandingGuestActions(): Promise<OutstandingGuestActionsResponse> {
     const response = await api.get("/alerts/outstanding-guest-actions");
+    return response.data;
+  }
+}
+
+export class DashboardService {
+  static async getStats(): Promise<DashboardStatsResponse> {
+    const response = await api.get("/dashboard/stats");
     return response.data;
   }
 }
