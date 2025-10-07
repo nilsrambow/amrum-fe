@@ -449,38 +449,63 @@ const clearFilters = () => {
 };
 
 const customFilter = (value: string, query: string, item: any) => {
-  if (!query) return true;
+  if (!query || !item) return true;
   
-  const searchTerm = query.toLowerCase();
-  
-  // Search guest name
-  const guestName = `${item.guest?.first_name || ''} ${item.guest?.last_name || ''}`.toLowerCase();
-  if (guestName.includes(searchTerm)) return true;
-  
-  // Search formatted dates
-  const checkInFormatted = formatDate(item.check_in).toLowerCase();
-  const checkOutFormatted = formatDate(item.check_out).toLowerCase();
-  if (checkInFormatted.includes(searchTerm) || checkOutFormatted.includes(searchTerm)) return true;
-  
-  // Search status text
-  const statusText = getStatusText(item.status).toLowerCase();
-  if (statusText.includes(searchTerm)) return true;
-  
-  // Search created date
-  const createdFormatted = formatDate(item.created_at).toLowerCase();
-  if (createdFormatted.includes(searchTerm)) return true;
-  
-  // Search raw status value
-  if (item.status.toLowerCase().includes(searchTerm)) return true;
-  
-  return false;
+  try {
+    const searchTerm = query.toLowerCase();
+    
+    // Search guest name
+    if (item.guest) {
+      const guestName = `${item.guest.first_name || ''} ${item.guest.last_name || ''}`.toLowerCase();
+      if (guestName.includes(searchTerm)) return true;
+    }
+    
+    // Search formatted dates
+    if (item.check_in) {
+      const checkInFormatted = formatDate(item.check_in).toLowerCase();
+      if (checkInFormatted.includes(searchTerm)) return true;
+    }
+    
+    if (item.check_out) {
+      const checkOutFormatted = formatDate(item.check_out).toLowerCase();
+      if (checkOutFormatted.includes(searchTerm)) return true;
+    }
+    
+    // Search status text
+    if (item.status) {
+      const statusText = getStatusText(item.status).toLowerCase();
+      if (statusText.includes(searchTerm)) return true;
+      
+      // Search raw status value
+      if (item.status.toLowerCase().includes(searchTerm)) return true;
+    }
+    
+    // Search created date
+    if (item.created_at) {
+      const createdFormatted = formatDate(item.created_at).toLowerCase();
+      if (createdFormatted.includes(searchTerm)) return true;
+    }
+    
+    return false;
+  } catch (error) {
+    console.error('Error in customFilter:', error, item);
+    return true; // Show the item if there's an error
+  }
 };
 
 const formatDate = (dateString: string) => {
-  return new Date(dateString).toLocaleDateString("de-DE", {
-    day: "2-digit",
-    month: "short",
-  });
+  if (!dateString) return '';
+  try {
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return '';
+    return date.toLocaleDateString("de-DE", {
+      day: "2-digit",
+      month: "short",
+    });
+  } catch (error) {
+    console.error('Error formatting date:', dateString, error);
+    return '';
+  }
 };
 
 const calculateNights = (checkIn: string, checkOut: string) => {
