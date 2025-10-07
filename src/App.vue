@@ -46,6 +46,8 @@
           to="/guests"
         ></v-list-item>
 
+        <!-- TODO: Add these routes when views are created -->
+        <!--
         <v-list-item
           prepend-icon="mdi-cash-multiple"
           title="Payments"
@@ -75,6 +77,7 @@
           value="settings"
           to="/settings"
         ></v-list-item>
+        -->
       </v-list>
     </v-navigation-drawer>
 
