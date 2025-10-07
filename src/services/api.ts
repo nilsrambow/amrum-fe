@@ -1,7 +1,7 @@
 import axios from "axios";
 
 // API Configuration
-// TODO: Make this dynamic 
+// TODO: Make this dynamic
 const API_BASE_URL = "http://homeserver.lan:8223";
 
 const api = axios.create({
@@ -37,7 +37,10 @@ api.interceptors.response.use(
     if (error.response?.status === 401) {
       // Unauthorized - clear token and redirect to login
       localStorage.removeItem("auth_token");
-      // router.push('/login')
+      // Only redirect if not already on login page
+      if (window.location.hash !== "#/login") {
+        window.location.hash = "#/login";
+      }
     }
     return Promise.reject(error);
   }
@@ -213,6 +216,22 @@ export interface OutstandingGuestAction {
 export interface OutstandingGuestActionsResponse {
   total_count: number;
   actions: OutstandingGuestAction[];
+}
+
+export interface DashboardStatsResponse {
+  total_bookings: number;
+  total_invoice_amount: number;
+  total_occupied_nights: number;
+}
+
+export interface LoginRequest {
+  username: string;
+  password: string;
+}
+
+export interface LoginResponse {
+  access_token: string;
+  token_type: string;
 }
 
 export interface GuestPaymentResponse {
@@ -527,6 +546,36 @@ export class AlertService {
   static async getOutstandingGuestActions(): Promise<OutstandingGuestActionsResponse> {
     const response = await api.get("/alerts/outstanding-guest-actions");
     return response.data;
+  }
+}
+
+export class DashboardService {
+  static async getStats(): Promise<DashboardStatsResponse> {
+    const response = await api.get("/dashboard/stats");
+    return response.data;
+  }
+}
+
+export class AuthService {
+  static async login(credentials: LoginRequest): Promise<LoginResponse> {
+    const response = await api.post("/auth/login", credentials);
+    return response.data;
+  }
+
+  static logout(): void {
+    localStorage.removeItem("auth_token");
+  }
+
+  static getToken(): string | null {
+    return localStorage.getItem("auth_token");
+  }
+
+  static setToken(token: string): void {
+    localStorage.setItem("auth_token", token);
+  }
+
+  static isAuthenticated(): boolean {
+    return !!this.getToken();
   }
 }
 

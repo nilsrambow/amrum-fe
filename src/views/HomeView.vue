@@ -14,49 +14,43 @@
 
     <!-- Key Metrics Cards -->
     <v-row class="mb-6">
-      <v-col cols="12" sm="6" md="3">
+      <v-col cols="12" sm="6" md="4">
         <v-card class="pa-4" color="primary" dark>
           <div class="d-flex align-center">
             <v-icon size="40" class="mr-4">mdi-calendar-check</v-icon>
             <div>
-              <div class="text-h4 font-weight-bold">12</div>
-              <div class="text-subtitle-2">Active Bookings</div>
+              <div class="text-h4 font-weight-bold">
+                {{ statsLoading ? '...' : statsData?.total_bookings || 0 }}
+              </div>
+              <div class="text-subtitle-2">Bookings This Year</div>
             </div>
           </div>
         </v-card>
       </v-col>
 
-      <v-col cols="12" sm="6" md="3">
+      <v-col cols="12" sm="6" md="4">
         <v-card class="pa-4" color="success" dark>
           <div class="d-flex align-center">
             <v-icon size="40" class="mr-4">mdi-cash-multiple</v-icon>
             <div>
-              <div class="text-h4 font-weight-bold">€4,250</div>
-              <div class="text-subtitle-2">Monthly Revenue</div>
+              <div class="text-h4 font-weight-bold">
+                {{ statsLoading ? '...' : formatCurrency(statsData?.total_invoice_amount || 0) }}
+              </div>
+              <div class="text-subtitle-2">Invoice Total This Year</div>
             </div>
           </div>
         </v-card>
       </v-col>
 
-      <v-col cols="12" sm="6" md="3">
+      <v-col cols="12" sm="6" md="4">
         <v-card class="pa-4" color="warning" dark>
           <div class="d-flex align-center">
-            <v-icon size="40" class="mr-4">mdi-account-group</v-icon>
+            <v-icon size="40" class="mr-4">mdi-bed</v-icon>
             <div>
-              <div class="text-h4 font-weight-bold">28</div>
-              <div class="text-subtitle-2">Registered Guests</div>
-            </div>
-          </div>
-        </v-card>
-      </v-col>
-
-      <v-col cols="12" sm="6" md="3">
-        <v-card class="pa-4" color="info" dark>
-          <div class="d-flex align-center">
-            <v-icon size="40" class="mr-4">mdi-gauge</v-icon>
-            <div>
-              <div class="text-h4 font-weight-bold">85%</div>
-              <div class="text-subtitle-2">Occupancy Rate</div>
+              <div class="text-h4 font-weight-bold">
+                {{ statsLoading ? '...' : statsData?.total_occupied_nights || 0 }}
+              </div>
+              <div class="text-subtitle-2">Occupied Nights This Year</div>
             </div>
           </div>
         </v-card>
@@ -122,12 +116,38 @@
 </template>
 
 <script setup lang="ts">
+import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import EmailAlerts from "@/components/EmailAlerts.vue";
 import GuestActions from "@/components/GuestActions.vue";
 import AvailabilityCalendar from "@/components/AvailabilityCalendar.vue";
+import { DashboardService, type DashboardStatsResponse } from "@/services/api";
 
 const router = useRouter();
+
+// Dashboard statistics
+const statsLoading = ref(false);
+const statsData = ref<DashboardStatsResponse | null>(null);
+
+const loadStats = async () => {
+  statsLoading.value = true;
+  try {
+    statsData.value = await DashboardService.getStats();
+  } catch (error) {
+    console.error("Failed to load dashboard stats:", error);
+  } finally {
+    statsLoading.value = false;
+  }
+};
+
+const formatCurrency = (amount: number): string => {
+  return new Intl.NumberFormat('de-DE', {
+    style: 'currency',
+    currency: 'EUR',
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  }).format(amount);
+};
 
 // Quick action methods
 const newBooking = () => {
@@ -137,4 +157,8 @@ const newBooking = () => {
 const addGuest = () => {
   router.push("/guests/add");
 };
+
+onMounted(() => {
+  loadStats();
+});
 </script>

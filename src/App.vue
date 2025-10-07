@@ -5,7 +5,7 @@
       app
       :rail="rail"
       @click="rail = false"
-      v-if="!isGuestRoute"
+      v-if="!isGuestRoute && isAuthenticated"
     >
       <v-list-item
         prepend-avatar="https://via.placeholder.com/40"
@@ -78,7 +78,7 @@
       </v-list>
     </v-navigation-drawer>
 
-    <v-app-bar app v-if="!isGuestRoute">
+    <v-app-bar app v-if="!isGuestRoute && isAuthenticated">
       <v-app-bar-nav-icon @click="drawer = !drawer"></v-app-bar-nav-icon>
 
       <v-app-bar-title>
@@ -104,7 +104,7 @@
           <v-list-item>
             <v-list-item-title>Profile</v-list-item-title>
           </v-list-item>
-          <v-list-item>
+          <v-list-item @click="handleLogout">
             <v-list-item-title>Logout</v-list-item-title>
           </v-list-item>
         </v-list>
@@ -121,17 +121,26 @@
 
 <script setup lang="ts">
 import { ref, computed } from "vue";
-import { useRoute } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
+import { useAuth } from "./composables/useAuth";
 
 const drawer = ref(true);
 const rail = ref(false);
 
 const route = useRoute();
+const router = useRouter();
+const { isAuthenticated, logout } = useAuth();
 
 // Check if current route is a guest route
 const isGuestRoute = computed(() => {
   return route.name === "guest-booking";
 });
+
+// Handle logout
+const handleLogout = () => {
+  logout();
+  router.push("/login");
+};
 </script>
 
 <style>
