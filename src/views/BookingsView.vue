@@ -182,7 +182,6 @@
         :items="bookingsWithGuests"
         :loading="loading"
         :search="search"
-        :custom-filter="customFilter"
         class="elevation-1"
         item-value="id"
       >
@@ -416,6 +415,12 @@ const bookingsWithGuests = computed(() => {
     return {
       ...booking,
       guest,
+      // Add searchable text fields for the built-in search
+      guestName: guest ? `${guest.first_name || ''} ${guest.last_name || ''}`.trim() : '',
+      checkInFormatted: formatDate(booking.check_in),
+      checkOutFormatted: formatDate(booking.check_out),
+      statusText: getStatusText(booking.status),
+      createdFormatted: formatDate(booking.created_at),
     };
   });
 });
@@ -448,75 +453,6 @@ const clearFilters = () => {
   search.value = "";
 };
 
-const customFilter = (value: string, query: string, item: any) => {
-  if (!query || !item) return true;
-  
-  try {
-    const searchTerm = query.toLowerCase();
-    console.log('Searching for:', searchTerm, 'in item:', item);
-    
-    // Search guest name
-    if (item.guest) {
-      const guestName = `${item.guest.first_name || ''} ${item.guest.last_name || ''}`.toLowerCase();
-      console.log('Guest name:', guestName);
-      if (guestName.includes(searchTerm)) {
-        console.log('Found match in guest name');
-        return true;
-      }
-    }
-    
-    // Search formatted dates
-    if (item.check_in) {
-      const checkInFormatted = formatDate(item.check_in).toLowerCase();
-      console.log('Check-in formatted:', checkInFormatted);
-      if (checkInFormatted.includes(searchTerm)) {
-        console.log('Found match in check-in date');
-        return true;
-      }
-    }
-    
-    if (item.check_out) {
-      const checkOutFormatted = formatDate(item.check_out).toLowerCase();
-      console.log('Check-out formatted:', checkOutFormatted);
-      if (checkOutFormatted.includes(searchTerm)) {
-        console.log('Found match in check-out date');
-        return true;
-      }
-    }
-    
-    // Search status text
-    if (item.status) {
-      const statusText = getStatusText(item.status).toLowerCase();
-      console.log('Status text:', statusText);
-      if (statusText.includes(searchTerm)) {
-        console.log('Found match in status text');
-        return true;
-      }
-      
-      // Search raw status value
-      if (item.status.toLowerCase().includes(searchTerm)) {
-        console.log('Found match in raw status');
-        return true;
-      }
-    }
-    
-    // Search created date
-    if (item.created_at) {
-      const createdFormatted = formatDate(item.created_at).toLowerCase();
-      console.log('Created formatted:', createdFormatted);
-      if (createdFormatted.includes(searchTerm)) {
-        console.log('Found match in created date');
-        return true;
-      }
-    }
-    
-    console.log('No match found for this item');
-    return false;
-  } catch (error) {
-    console.error('Error in customFilter:', error, item);
-    return true; // Show the item if there's an error
-  }
-};
 
 const formatDate = (dateString: string) => {
   if (!dateString) return '';
