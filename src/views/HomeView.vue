@@ -72,20 +72,6 @@
       </v-col>
     </v-row>
 
-    <!-- Email Alerts -->
-    <v-row class="mb-6">
-      <v-col cols="12">
-        <EmailAlerts />
-      </v-col>
-    </v-row>
-
-    <!-- Outstanding Guest Actions -->
-    <v-row class="mb-6">
-      <v-col cols="12">
-        <GuestActions />
-      </v-col>
-    </v-row>
-
 
     <v-row class="mb-6">
       <v-col cols="6">

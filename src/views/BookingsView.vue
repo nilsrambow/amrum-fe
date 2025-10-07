@@ -22,16 +22,12 @@
       </v-col>
     </v-row>
 
-    <!-- Email Alerts -->
+
     <v-row class="mb-6">
-      <v-col cols="12">
+      <v-col cols="6">
         <EmailAlerts />
       </v-col>
-    </v-row>
-
-    <!-- Outstanding Guest Actions -->
-    <v-row class="mb-6">
-      <v-col cols="12">
+      <v-col cols="6">
         <GuestActions />
       </v-col>
     </v-row>
@@ -202,10 +198,7 @@
         <template v-slot:[`item.dates`]="{ item }">
           <div>
             <div class="font-weight-medium">
-              {{ formatDate(item.check_in) }}
-            </div>
-            <div class="text-caption text-medium-emphasis">
-              to {{ formatDate(item.check_out) }}
+              {{ formatDate(item.check_in) }} - {{ formatDate(item.check_out) }}
             </div>
             <v-chip size="x-small" color="info" class="mt-1">
               {{ calculateNights(item.check_in, item.check_out) }} nights
@@ -261,48 +254,6 @@
                 ></v-btn>
               </template>
             </v-tooltip>
-
-            <v-tooltip
-              v-if="item.status !== 'confirmed'"
-              text="Confirm Booking"
-            >
-              <template #activator="{ props }">
-                <v-btn
-                  v-bind="props"
-                  icon="mdi-check"
-                  size="small"
-                  variant="text"
-                  color="success"
-                  @click="confirmBooking(item)"
-                ></v-btn>
-              </template>
-            </v-tooltip>
-
-            <v-menu>
-              <template #activator="{ props }">
-                <v-btn
-                  v-bind="props"
-                  icon="mdi-dots-vertical"
-                  size="small"
-                  variant="text"
-                ></v-btn>
-              </template>
-              <v-list>
-                <v-list-item @click="sendKurkartenEmail(item.id)">
-                  <v-list-item-title>Send Kurkarten Email</v-list-item-title>
-                </v-list-item>
-                <v-list-item @click="sendPreArrivalEmail(item.id)">
-                  <v-list-item-title>Send Pre-arrival Email</v-list-item-title>
-                </v-list-item>
-                <v-list-item @click="generateInvoice(item.id)">
-                  <v-list-item-title>Generate Invoice</v-list-item-title>
-                </v-list-item>
-                <v-divider></v-divider>
-                <v-list-item @click="deleteBooking(item)" class="text-error">
-                  <v-list-item-title>Delete Booking</v-list-item-title>
-                </v-list-item>
-              </v-list>
-            </v-menu>
           </div>
         </template>
 
@@ -363,9 +314,9 @@ const snackbarColor = ref("success");
 // Table headers
 const headers = [
   { title: "Guest", key: "guest", sortable: false },
-  { title: "Dates", key: "dates", sortable: false },
-  { title: "Status", key: "status", sortable: false },
-  { title: "Created", key: "created_at", sortable: true },
+  { title: "Dates", key: "dates", sortable: true },
+  { title: "Status", key: "status", sortable: true },
+  // { title: "Created", key: "created_at", sortable: true },
   { title: "Actions", key: "actions", sortable: false, width: "140px" },
 ];
 
@@ -497,10 +448,9 @@ const clearFilters = () => {
 };
 
 const formatDate = (dateString: string) => {
-  return new Date(dateString).toLocaleDateString("en-US", {
+  return new Date(dateString).toLocaleDateString("de-DE", {
+    day: "2-digit",
     month: "short",
-    day: "numeric",
-    year: "numeric",
   });
 };
 
