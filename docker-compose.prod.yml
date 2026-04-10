@@ -1,0 +1,12 @@
+version: "3.9"
+services:
+  amrum-fe:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        VUE_APP_API_BASE_URL: https://rambow09.dedyn.io/api
+    container_name: amrum-fe-prod
+    ports:
+      - "6333:80"  # nginx serves on 80
+    restart: unless-stopped
