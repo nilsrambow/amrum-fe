@@ -8,5 +8,5 @@ services:
         VUE_APP_API_BASE_URL: https://rambow09.dedyn.io/api
     container_name: amrum-fe-prod
     ports:
-      - "6333:80"  # nginx serves on 80
+      - "7333:80"  # nginx serves on 80
     restart: unless-stopped
