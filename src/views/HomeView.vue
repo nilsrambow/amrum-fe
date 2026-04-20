@@ -22,7 +22,7 @@
                 <v-icon size="40" class="mr-4">mdi-calendar-check</v-icon>
                 <div>
                   <div class="text-h4 font-weight-bold">
-                    {{ statsLoading ? '...' : statsData?.total_bookings || 0 }}
+                    {{ statsLoading ? "..." : statsData?.total_bookings || 0 }}
                   </div>
                   <div class="text-subtitle-2">Bookings</div>
                 </div>
@@ -34,21 +34,27 @@
       </v-col>
 
       <v-col cols="12" sm="6" md="4">
-          <v-tooltip location="top">
+        <v-tooltip location="top">
           <template v-slot:activator="{ props }">
             <v-card v-bind="props" class="pa-4" color="success" dark>
               <div class="d-flex align-center">
                 <v-icon size="40" class="mr-4">mdi-cash-multiple</v-icon>
                 <div>
                   <div class="text-h4 font-weight-bold">
-                    {{ statsLoading ? '...' : formatCurrency(statsData?.total_invoice_amount || 0) }}
+                    {{
+                      statsLoading
+                        ? "..."
+                        : formatCurrency(statsData?.total_invoice_amount || 0)
+                    }}
                   </div>
                   <div class="text-subtitle-2">Invoice Total</div>
                 </div>
               </div>
             </v-card>
           </template>
-          <span>Total revenue generated from all invoices in the current year</span>
+          <span
+            >Total revenue generated from all invoices in the current year</span
+          >
         </v-tooltip>
       </v-col>
 
@@ -60,18 +66,23 @@
                 <v-icon size="40" class="mr-4">mdi-bed</v-icon>
                 <div>
                   <div class="text-h4 font-weight-bold">
-                    {{ statsLoading ? '...' : statsData?.total_occupied_nights || 0 }}
+                    {{
+                      statsLoading
+                        ? "..."
+                        : statsData?.total_occupied_nights || 0
+                    }}
                   </div>
                   <div class="text-subtitle-2">Occupied Nights</div>
                 </div>
               </div>
             </v-card>
           </template>
-          <span>Total number of nights your property is occupied this year</span>
+          <span
+            >Total number of nights your property is occupied this year</span
+          >
         </v-tooltip>
       </v-col>
     </v-row>
-
 
     <v-row class="mb-6">
       <v-col cols="6">
@@ -152,9 +163,9 @@ const loadStats = async () => {
 };
 
 const formatCurrency = (amount: number): string => {
-  return new Intl.NumberFormat('de-DE', {
-    style: 'currency',
-    currency: 'EUR',
+  return new Intl.NumberFormat("de-DE", {
+    style: "currency",
+    currency: "EUR",
     minimumFractionDigits: 0,
     maximumFractionDigits: 0,
   }).format(amount);

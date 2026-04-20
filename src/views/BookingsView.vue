@@ -22,7 +22,6 @@
       </v-col>
     </v-row>
 
-
     <v-row class="mb-6">
       <v-col cols="6">
         <EmailAlerts />
@@ -442,19 +441,18 @@ const clearFilters = () => {
   filterPayment.value = null;
 };
 
-
 const formatDate = (dateString: string) => {
-  if (!dateString) return '';
+  if (!dateString) return "";
   try {
     const date = new Date(dateString);
-    if (isNaN(date.getTime())) return '';
+    if (isNaN(date.getTime())) return "";
     return date.toLocaleDateString("de-DE", {
       day: "2-digit",
       month: "short",
     });
   } catch (error) {
-    console.error('Error formatting date:', dateString, error);
-    return '';
+    console.error("Error formatting date:", dateString, error);
+    return "";
   }
 };
 
