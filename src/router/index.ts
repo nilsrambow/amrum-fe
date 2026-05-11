@@ -93,6 +93,14 @@ const routes: Array<RouteRecordRaw> = [
     props: true,
   },
   {
+    path: "/availability",
+    name: "availability",
+    component: () =>
+      import(
+        /* webpackChunkName: "availability" */ "../views/AvailabilityView.vue"
+      ),
+  },
+  {
     path: "/about",
     name: "about",
     // route level code-splitting
