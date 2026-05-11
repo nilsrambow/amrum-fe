@@ -13,14 +13,6 @@
             <div class="text-caption">Guest Portal</div>
           </div>
         </div>
-        <v-btn
-          variant="text"
-          color="white"
-          prepend-icon="mdi-arrow-left"
-          @click="$router.push('/')"
-        >
-          Back to Home
-        </v-btn>
       </div>
     </div>
 
@@ -127,6 +119,106 @@
               </v-col>
             </v-row>
           </div>
+        </v-card-text>
+      </v-card>
+
+      <!-- How to Get There -->
+      <v-card class="mb-6">
+        <v-card-title>
+          <v-icon class="mr-2">mdi-map-marker-outline</v-icon>
+          How to Get There
+        </v-card-title>
+        <v-card-text>
+          <div class="text-body-1 mb-3">
+            <strong>Address:</strong> Rantumer Str. 20, 25946 Nebel, Amrum
+          </div>
+          <v-divider class="my-3"></v-divider>
+          <div class="text-subtitle-2 font-weight-bold mb-2">By Ferry</div>
+          <div class="text-body-2 mb-3">
+            Ferries run from Dagebüll (WDR). The crossing takes about 90 minutes.
+            Check current schedules at <strong>faehre.de</strong>. The house is a
+            short walk or taxi ride from the ferry dock in Wittdün.
+          </div>
+          <div class="text-subtitle-2 font-weight-bold mb-2">From the Ferry Dock</div>
+          <div class="text-body-2">
+            Head north from the Wittdün ferry terminal. Follow the main road
+            (Strandstr.) through Wittdün toward Nebel — the drive takes about
+            10 minutes. In Nebel, turn onto Rantumer Str.; the house is on the
+            left, number 20.
+          </div>
+        </v-card-text>
+      </v-card>
+
+      <!-- Entry & Keys -->
+      <v-card class="mb-6">
+        <v-card-title>
+          <v-icon class="mr-2">mdi-key-outline</v-icon>
+          Entry & Keys
+        </v-card-title>
+        <v-card-text>
+          <v-alert type="info" variant="tonal" class="mb-4">
+            <div class="text-subtitle-2 mb-1">Key Handover</div>
+            <div class="text-body-2">
+              The key will be left for you at the property. A neighbour will
+              contact you with the exact handover details before your arrival.
+              If you have any issues, contact us directly.
+            </div>
+          </v-alert>
+          <div class="text-body-2">
+            <strong>Check-in:</strong> from 15:00<br />
+            <strong>Check-out:</strong> by 11:00 — please leave the key in the
+            house and close the door behind you.
+          </div>
+        </v-card-text>
+      </v-card>
+
+      <!-- WiFi -->
+      <v-card class="mb-6">
+        <v-card-title>
+          <v-icon class="mr-2">mdi-wifi</v-icon>
+          WiFi
+        </v-card-title>
+        <v-card-text>
+          <v-row>
+            <v-col cols="12" sm="6">
+              <div class="text-subtitle-2 text-medium-emphasis">Network</div>
+              <div class="text-body-1 font-weight-bold">Haus Amrum</div>
+            </v-col>
+            <v-col cols="12" sm="6">
+              <div class="text-subtitle-2 text-medium-emphasis">Password</div>
+              <div class="text-body-1 font-weight-bold">amrum2024</div>
+            </v-col>
+          </v-row>
+        </v-card-text>
+      </v-card>
+
+      <!-- House Rules -->
+      <v-card class="mb-6">
+        <v-card-title>
+          <v-icon class="mr-2">mdi-clipboard-list-outline</v-icon>
+          House Rules
+        </v-card-title>
+        <v-card-text>
+          <v-list density="compact">
+            <v-list-item prepend-icon="mdi-smoking-off">
+              No smoking inside the house.
+            </v-list-item>
+            <v-list-item prepend-icon="mdi-dog-off">
+              No pets allowed without prior agreement.
+            </v-list-item>
+            <v-list-item prepend-icon="mdi-volume-off">
+              Please keep noise to a minimum after 22:00.
+            </v-list-item>
+            <v-list-item prepend-icon="mdi-fire-extinguisher">
+              No open fires inside. The fireplace may only be used with the
+              supplied wood (firewood boxes — please log usage in the meter
+              reading form below).
+            </v-list-item>
+            <v-list-item prepend-icon="mdi-broom">
+              Please leave the house in a tidy condition. A cleaning fee is
+              included in your booking.
+            </v-list-item>
+          </v-list>
         </v-card-text>
       </v-card>
 

@@ -5,7 +5,10 @@ services:
       context: .
       dockerfile: Dockerfile
       args:
-        VUE_APP_API_BASE_URL: https://rambow09.dedyn.io/api
+        # Set GUEST_TUNNEL_URL to your Cloudflare Tunnel public URL before building,
+        # e.g.: export GUEST_TUNNEL_URL=https://guests.yourdomain.com
+        # then: docker compose -f docker-compose.prod.yml up -d --build
+        VUE_APP_API_BASE_URL: ${GUEST_TUNNEL_URL:-https://rambow09.dedyn.io}/api
     container_name: amrum-fe-prod
     ports:
       - "7333:80"  # nginx serves on 80
