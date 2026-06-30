@@ -779,7 +779,10 @@
             <strong>Booking #{{ booking.id }}</strong>
             <span v-if="booking.guest">
               for
-              <strong>{{ booking.guest.first_name }} {{ booking.guest.last_name }}</strong>
+              <strong
+                >{{ booking.guest.first_name }}
+                {{ booking.guest.last_name }}</strong
+              >
             </span>
             ({{ formatDateRange(booking.check_in, booking.check_out) }}).
           </p>
@@ -787,7 +790,11 @@
         </v-card-text>
         <v-card-actions>
           <v-spacer />
-          <v-btn variant="text" @click="deleteDialog = false" :disabled="deleting">
+          <v-btn
+            variant="text"
+            @click="deleteDialog = false"
+            :disabled="deleting"
+          >
             Cancel
           </v-btn>
           <v-btn
