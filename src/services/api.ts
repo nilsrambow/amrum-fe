@@ -342,6 +342,10 @@ export class BookingService {
     return response.data;
   }
 
+  static async delete(id: number): Promise<void> {
+    await api.delete(`/booking/${id}`);
+  }
+
   static async updateKurtaxe(
     id: number,
     data: { kurtaxe_amount?: number; kurtaxe_notes?: string }
