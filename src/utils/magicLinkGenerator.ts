@@ -9,7 +9,7 @@
  * @returns The complete magic link URL
  */
 export function generateMagicLink(baseUrl: string, token: string): string {
-  return `${baseUrl}/#/guest/booking/${token}`;
+  return `${baseUrl}/guest/booking/${token}`;
 }
 
 /**
