@@ -212,6 +212,33 @@
           Informationen zur Müllentsorgung
         </v-card-title>
         <v-card-text class="text-body-1">
+          <v-alert
+            v-if="wasteReminders && wasteReminders.length > 0"
+            type="warning"
+            variant="tonal"
+            icon="mdi-delete-alert"
+            class="mb-4"
+          >
+            <div class="text-subtitle-1 font-weight-bold mb-2">
+              Tonnen rausstellen
+            </div>
+            <ul class="pl-4">
+              <li v-for="reminder in wasteReminders" :key="reminder.key">
+                <strong>{{ reminder.when }}:</strong>
+                {{ reminder.label }} rausstellen (Abholung am
+                {{ reminder.pickup }})
+              </li>
+            </ul>
+          </v-alert>
+          <v-alert
+            v-else-if="wasteReminders"
+            type="success"
+            variant="tonal"
+            class="mb-4"
+          >
+            Während Deines Aufenthalts steht keine Tonnenleerung an.
+          </v-alert>
+
           <v-alert type="info" variant="tonal" class="mb-4">
             In der Innentür des Schranks im Wohnzimmer befindet sich eine
             Übersicht über die Müllabfuhrtermine. Bitte achte darauf, wann
@@ -221,8 +248,8 @@
           <strong>Mülltrennung:</strong>
           <ul class="mt-2 pl-4">
             <li>
-              <strong>Restmüll:</strong> Schwarze Tonne – nicht recycelbare
-              Abfälle
+              <strong>Restmüll:</strong> Schwarze/graue Tonne – nicht
+              recycelbare Abfälle
             </li>
             <li>
               <strong>Papier &amp; Pappe:</strong> Grüne Tonne – Zeitungen,
@@ -518,6 +545,29 @@ const hasKurtaxe = computed(
     booking.value?.kurtaxe_amount !== undefined
 );
 
+// Bins to put out: on the evening before the collection, or before departure
+// if the collection is after check-out
+const wasteBinLabels: Record<string, string> = {
+  restmuell: "Restmüll-Tonne (schwarz/grau)",
+  papier: "Grüne Tonne (Papier & Pappe)",
+  plastik: "Gelbe Tonne (Plastik & Metall)",
+};
+
+// null = no dates known for this stay, [] = no collection during the stay
+const wasteReminders = computed(() => {
+  if (!booking.value || !booking.value.waste_pickups) return null;
+  const checkOut = booking.value.check_out;
+  return booking.value.waste_pickups.map((pickup) => ({
+    key: `${pickup.date}-${pickup.bin_type}`,
+    when:
+      pickup.put_out_date < checkOut
+        ? `${formatShortDate(pickup.put_out_date)} abends`
+        : `Vor Deiner Abreise (${formatShortDate(checkOut)})`,
+    label: wasteBinLabels[pickup.bin_type] ?? pickup.bin_type,
+    pickup: formatShortDate(pickup.date),
+  }));
+});
+
 // Methods
 const showSnackbar = (text: string, color = "success") => {
   snackbarText.value = text;
@@ -567,6 +617,14 @@ const formatDate = (dateString: string) => {
     year: "numeric",
     month: "long",
     day: "numeric",
+  });
+};
+
+const formatShortDate = (dateString: string) => {
+  return new Date(dateString).toLocaleDateString("de-DE", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
   });
 };
 
