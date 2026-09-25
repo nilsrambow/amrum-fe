@@ -5,22 +5,12 @@
       class="guest-header pa-4 bg-primary text-white"
       v-if="!loading && !error"
     >
-      <div class="d-flex align-center justify-space-between">
-        <div class="d-flex align-center">
-          <v-icon size="32" class="mr-3">mdi-home-variant</v-icon>
-          <div>
-            <div class="text-h6 font-weight-bold">Amrum Property</div>
-            <div class="text-caption">Guest Portal</div>
-          </div>
+      <div class="d-flex align-center">
+        <v-icon size="32" class="mr-3">mdi-home-variant</v-icon>
+        <div>
+          <div class="text-h6 font-weight-bold">Amrum Property</div>
+          <div class="text-caption">Gästeportal</div>
         </div>
-        <v-btn
-          variant="text"
-          color="white"
-          prepend-icon="mdi-arrow-left"
-          @click="$router.push('/')"
-        >
-          Back to Home
-        </v-btn>
       </div>
     </div>
 
@@ -30,19 +20,17 @@
         color="primary"
         size="64"
       ></v-progress-circular>
-      <div class="mt-4 text-h6">Loading your booking...</div>
+      <div class="mt-4 text-h6">Deine Buchung wird geladen ...</div>
     </div>
 
     <div v-else-if="error" class="text-center pa-8">
       <v-icon color="error" size="64" class="mb-4">mdi-alert-circle</v-icon>
-      <div class="text-h5 mb-2">Booking Not Found</div>
-      <div class="text-body-1 mb-4">
-        {{
-          errorMessage ||
-          "The booking link you're trying to access is invalid or has expired."
-        }}
+      <div class="text-h5 mb-2">Buchung nicht gefunden</div>
+      <div class="text-body-1 mb-2">Der Link ist ungültig oder abgelaufen.</div>
+      <div class="text-body-2 text-medium-emphasis">
+        Bei Fragen melde Dich gerne bei uns:
+        <a href="mailto:hausb@mailbox.org">hausb@mailbox.org</a>
       </div>
-      <v-btn color="primary" @click="$router.push('/')"> Return to Home </v-btn>
     </div>
 
     <div v-else-if="booking" class="max-width-800 mx-auto pa-4">
@@ -51,9 +39,9 @@
         <v-card-title class="d-flex align-center">
           <v-icon class="mr-3" color="primary">mdi-home</v-icon>
           <div>
-            <div class="text-h5">Your Booking Details</div>
+            <div class="text-h5">Deine Buchungsdetails</div>
             <div class="text-subtitle-1 text-medium-emphasis">
-              {{ formatDate(booking.check_in) }} -
+              {{ formatDate(booking.check_in) }} –
               {{ formatDate(booking.check_out) }}
             </div>
           </div>
@@ -64,21 +52,23 @@
       <v-card class="mb-6">
         <v-card-title>
           <v-icon class="mr-2">mdi-calendar</v-icon>
-          Booking Information
+          Buchungsinformationen
         </v-card-title>
         <v-card-text>
           <v-row>
             <v-col cols="12" md="6">
               <div class="text-subtitle-2 text-medium-emphasis">Check-in</div>
               <div class="text-h6">{{ formatDate(booking.check_in) }}</div>
+              <div class="text-body-2">ab 13:00 Uhr</div>
             </v-col>
             <v-col cols="12" md="6">
               <div class="text-subtitle-2 text-medium-emphasis">Check-out</div>
               <div class="text-h6">{{ formatDate(booking.check_out) }}</div>
+              <div class="text-body-2">bis 11:00 Uhr</div>
             </v-col>
             <v-col cols="12" md="6">
               <div class="text-subtitle-2 text-medium-emphasis">
-                Number of Nights
+                Anzahl der Nächte
               </div>
               <div class="text-h6">{{ nightsCount }}</div>
             </v-col>
@@ -94,7 +84,7 @@
 
           <div>
             <div class="text-subtitle-2 text-medium-emphasis mb-2">
-              Guest Information
+              Gäste-Informationen
             </div>
             <v-row>
               <v-col cols="12" md="6">
@@ -102,27 +92,25 @@
                 <div class="text-body-1">{{ booking.guest_name }}</div>
               </v-col>
               <v-col cols="12" md="6">
-                <div class="text-subtitle-2 text-medium-emphasis">Email</div>
+                <div class="text-subtitle-2 text-medium-emphasis">E-Mail</div>
                 <div class="text-body-1">{{ booking.guest_email }}</div>
               </v-col>
             </v-row>
           </div>
 
-          <v-divider class="my-4" v-if="booking.kurtaxe_amount"></v-divider>
+          <v-divider class="my-4" v-if="hasKurtaxe"></v-divider>
 
-          <div v-if="booking.kurtaxe_amount">
-            <div class="text-subtitle-2 text-medium-emphasis mb-2">
-              Tourist Tax
-            </div>
+          <div v-if="hasKurtaxe">
+            <div class="text-subtitle-2 text-medium-emphasis mb-2">Kurtaxe</div>
             <v-row>
               <v-col cols="12" md="6">
-                <div class="text-subtitle-2 text-medium-emphasis">Amount</div>
+                <div class="text-subtitle-2 text-medium-emphasis">Betrag</div>
                 <div class="text-body-1">
-                  {{ formatCurrency(booking.kurtaxe_amount) }}
+                  {{ formatCurrency(booking.kurtaxe_amount ?? 0) }}
                 </div>
               </v-col>
               <v-col cols="12" md="6" v-if="booking.kurtaxe_notes">
-                <div class="text-subtitle-2 text-medium-emphasis">Notes</div>
+                <div class="text-subtitle-2 text-medium-emphasis">Hinweise</div>
                 <div class="text-body-1">{{ booking.kurtaxe_notes }}</div>
               </v-col>
             </v-row>
@@ -130,42 +118,125 @@
         </v-card-text>
       </v-card>
 
-      <!-- Trash Service Information -->
+      <!-- Arrival -->
+      <v-card class="mb-6">
+        <v-card-title>
+          <v-icon class="mr-2">mdi-map-marker</v-icon>
+          Anreise
+        </v-card-title>
+        <v-card-text class="text-body-1">
+          <div class="mb-4">
+            <strong>Adresse:</strong> Tanenwai 4, 25946 Nebel, Amrum
+          </div>
+
+          <div class="text-subtitle-1 font-weight-bold mb-1">Mit der Fähre</div>
+          <p class="mb-4">
+            Fähren verkehren ab Dagebüll (WDR), die Überfahrt dauert etwa 90
+            Minuten. Aktuelle Fahrpläne findest Du unter
+            <a href="https://www.faehre.de" target="_blank" rel="noopener"
+              >faehre.de</a
+            >. Ab dem Fähranleger Wittdün kannst Du den Bus nach
+            Nebel/Westerheide nehmen oder Dir ein Taxi rufen.
+          </p>
+
+          <div class="text-subtitle-1 font-weight-bold mb-1">Mit dem Auto</div>
+          <p>
+            Mit dem Auto fährst Du die Inselstraße am Leuchtturm und an Süddorf
+            vorbei. Die Fahrt dauert etwa zehn Minuten bis Tanenwai 4.
+          </p>
+        </v-card-text>
+      </v-card>
+
+      <!-- Access & Wi-Fi -->
+      <v-card class="mb-6">
+        <v-card-title>
+          <v-icon class="mr-2">mdi-key</v-icon>
+          Zugang &amp; Schlüssel
+        </v-card-title>
+        <v-card-text class="text-body-1">
+          <p class="mb-2">
+            Der Schlüssel hängt im Fahrradschuppen an der Wand direkt hinter der
+            Tür an einem Haken. Den Code für das Zahlenschloss am
+            Fahrradschuppen solltest Du kennen – falls Du Dir unsicher bist,
+            frag gerne nach, dann sagen wir ihn Dir.
+          </p>
+          <p>
+            Bitte hänge den Schlüssel bei Deiner Abreise wieder in den Schuppen
+            und verschließe die Tür mit dem Zahlenschloss.
+          </p>
+        </v-card-text>
+      </v-card>
+
+      <v-card class="mb-6">
+        <v-card-title>
+          <v-icon class="mr-2">mdi-wifi</v-icon>
+          WLAN
+        </v-card-title>
+        <v-card-text class="text-body-1">
+          Im Haus beim Telefon hängt ein QR-Code zum Anmelden im WLAN. Dafür ist
+          kein Passwort erforderlich.
+        </v-card-text>
+      </v-card>
+
+      <!-- House rules -->
+      <v-card class="mb-6">
+        <v-card-title>
+          <v-icon class="mr-2">mdi-clipboard-list</v-icon>
+          Hausordnung
+        </v-card-title>
+        <v-card-text class="text-body-1">
+          <ul class="pl-4">
+            <li>Rauchen im Haus ist nicht gestattet.</li>
+            <li>Haustiere sind ohne vorherige Absprache nicht erlaubt.</li>
+            <li>Bitte vermeide Lärm nach 22:00 Uhr.</li>
+            <li>
+              Kein offenes Feuer im Haus. Der Kamin darf nur mit dem
+              bereitgestellten Holz genutzt werden (Kaminholzkisten – bitte
+              trage den Verbrauch in das Zählerstandsformular weiter unten ein).
+            </li>
+            <li>
+              Bitte hinterlasse das Haus in einem ordentlichen und sauberen
+              Zustand. Dazu gehört die Reinigung des gesamten Wohnbereichs
+              (Saugen und Wischen von Wohnzimmer und Schlafräumen), der Toilette
+              und des Duschbads. Es gibt keine weitere Reinigung, bevor die
+              nächsten Gäste kommen.
+            </li>
+          </ul>
+        </v-card-text>
+      </v-card>
+
+      <!-- Waste -->
       <v-card class="mb-6">
         <v-card-title>
           <v-icon class="mr-2">mdi-delete</v-icon>
-          Trash Service Information
+          Informationen zur Müllentsorgung
         </v-card-title>
-        <v-card-text>
+        <v-card-text class="text-body-1">
           <v-alert type="info" variant="tonal" class="mb-4">
-            <div class="text-subtitle-2 mb-2">Important Information</div>
-            <div class="text-body-2">
-              Trash collection takes place every Tuesday morning. Please ensure
-              all trash is properly sorted and placed in the designated
-              containers by Monday evening.
-            </div>
+            In der Innentür des Schranks im Wohnzimmer befindet sich eine
+            Übersicht über die Müllabfuhrtermine. Bitte achte darauf, wann
+            welche Tonne geleert wird, und stelle sie am Vorabend an die Straße.
           </v-alert>
 
-          <div class="text-body-1">
-            <strong>Trash Sorting:</strong>
-            <ul class="mt-2">
-              <li>
-                <strong>General Waste:</strong> Black bin - non-recyclable items
-              </li>
-              <li>
-                <strong>Paper & Cardboard:</strong> Blue bin - newspapers,
-                magazines, cardboard boxes
-              </li>
-              <li>
-                <strong>Plastic & Metal:</strong> Yellow bin - plastic bottles,
-                cans, metal packaging
-              </li>
-              <li>
-                <strong>Organic Waste:</strong> Green bin - food scraps, garden
-                waste
-              </li>
-            </ul>
-          </div>
+          <strong>Mülltrennung:</strong>
+          <ul class="mt-2 pl-4">
+            <li>
+              <strong>Restmüll:</strong> Schwarze Tonne – nicht recycelbare
+              Abfälle
+            </li>
+            <li>
+              <strong>Papier &amp; Pappe:</strong> Grüne Tonne – Zeitungen,
+              Zeitschriften, Kartons
+            </li>
+            <li>
+              <strong>Plastik &amp; Metall:</strong> Gelbe Tonne –
+              Plastikflaschen, Dosen, Metallverpackungen
+            </li>
+            <li>
+              <strong>Kompost:</strong> Kompost-Tonnen – ausschließlich
+              Gartenabfälle, <strong>keine Küchenabfälle</strong> (wegen Ratten)
+            </li>
+          </ul>
         </v-card-text>
       </v-card>
 
@@ -173,14 +244,14 @@
       <v-card>
         <v-card-title>
           <v-icon class="mr-2">mdi-counter</v-icon>
-          Meter Readings
+          Zählerstände
           <v-chip
             v-if="booking.meter_readings"
             color="success"
             size="small"
             class="ml-2"
           >
-            Submitted
+            Übermittelt
           </v-chip>
         </v-card-title>
         <v-card-text>
@@ -188,43 +259,46 @@
             <v-icon color="success" size="48" class="mb-3"
               >mdi-check-circle</v-icon
             >
-            <div class="text-h6 mb-2">Readings Already Submitted</div>
+            <div class="text-h6 mb-2">Zählerstände bereits übermittelt</div>
             <div class="text-body-2 text-medium-emphasis">
-              Your meter readings have been successfully submitted. Thank you!
+              Deine Zählerstände sind bei uns angekommen. Vielen Dank!
             </div>
 
             <!-- Show submitted readings -->
             <v-card variant="outlined" class="mt-4">
-              <v-card-title class="text-h6">Submitted Readings</v-card-title>
+              <v-card-title class="text-h6"
+                >Übermittelte Zählerstände</v-card-title
+              >
               <v-card-text>
                 <v-row>
                   <v-col cols="12" md="6">
                     <div class="text-subtitle-2 text-medium-emphasis">
-                      Electricity
+                      Strom
                     </div>
                     <div class="text-body-1">
-                      Start:
-                      {{ booking.meter_readings.electricity_start || "N/A" }}
+                      Anfang:
+                      {{ booking.meter_readings.electricity_start ?? "k. A." }}
                       kWh<br />
-                      End:
-                      {{ booking.meter_readings.electricity_end || "N/A" }} kWh
+                      Ende:
+                      {{ booking.meter_readings.electricity_end ?? "k. A." }}
+                      kWh
                     </div>
                   </v-col>
                   <v-col cols="12" md="6">
                     <div class="text-subtitle-2 text-medium-emphasis">Gas</div>
                     <div class="text-body-1">
-                      Start:
-                      {{ booking.meter_readings.gas_start || "N/A" }} m³<br />
-                      End: {{ booking.meter_readings.gas_end || "N/A" }} m³
+                      Anfang:
+                      {{ booking.meter_readings.gas_start ?? "k. A." }} m³<br />
+                      Ende: {{ booking.meter_readings.gas_end ?? "k. A." }} m³
                     </div>
                   </v-col>
                   <v-col cols="12" md="6">
                     <div class="text-subtitle-2 text-medium-emphasis">
-                      Firewood
+                      Kaminholz
                     </div>
                     <div class="text-body-1">
-                      {{ booking.meter_readings.firewood_boxes || 0 }} boxes
-                      used
+                      {{ booking.meter_readings.firewood_boxes ?? 0 }} Kisten
+                      verbraucht
                     </div>
                   </v-col>
                 </v-row>
@@ -234,11 +308,12 @@
 
           <div v-else>
             <v-alert type="warning" variant="tonal" class="mb-4">
-              <div class="text-subtitle-2 mb-2">Important Notice</div>
+              <div class="text-subtitle-2 mb-2">Wichtiger Hinweis</div>
               <div class="text-body-2">
-                Please submit your meter readings after your departure. You can
-                only submit readings once, so please ensure all values are
-                correct before submitting.
+                Bitte übermittle Deine Zählerstände für Strom, Gas und den
+                Kaminholzverbrauch nach Deiner Abreise. Du kannst die Werte nur
+                einmal einreichen. Bitte überprüfe daher alle Angaben vor dem
+                Absenden auf ihre Richtigkeit.
               </div>
             </v-alert>
 
@@ -247,7 +322,7 @@
                 <v-col cols="12" md="6">
                   <v-text-field
                     v-model.number="readingsData.electricity_start"
-                    label="Electricity Start Reading"
+                    label="Strom – Stand bei Anreise"
                     type="number"
                     variant="outlined"
                     prepend-inner-icon="mdi-lightning-bolt"
@@ -258,7 +333,7 @@
                 <v-col cols="12" md="6">
                   <v-text-field
                     v-model.number="readingsData.electricity_end"
-                    label="Electricity End Reading"
+                    label="Strom – Stand bei Abreise"
                     type="number"
                     variant="outlined"
                     prepend-inner-icon="mdi-lightning-bolt"
@@ -269,7 +344,7 @@
                 <v-col cols="12" md="6">
                   <v-text-field
                     v-model.number="readingsData.gas_start"
-                    label="Gas Start Reading"
+                    label="Gas – Stand bei Anreise"
                     type="number"
                     variant="outlined"
                     prepend-inner-icon="mdi-fire"
@@ -280,7 +355,7 @@
                 <v-col cols="12" md="6">
                   <v-text-field
                     v-model.number="readingsData.gas_end"
-                    label="Gas End Reading"
+                    label="Gas – Stand bei Abreise"
                     type="number"
                     variant="outlined"
                     prepend-inner-icon="mdi-fire"
@@ -291,11 +366,11 @@
                 <v-col cols="12" md="6">
                   <v-text-field
                     v-model.number="readingsData.firewood_boxes"
-                    label="Firewood Consumption"
+                    label="Kaminholz – Verbrauch"
                     type="number"
                     variant="outlined"
                     prepend-inner-icon="mdi-wood"
-                    suffix="boxes"
+                    suffix="Kisten"
                     :rules="numberRules"
                   ></v-text-field>
                 </v-col>
@@ -310,7 +385,7 @@
                 :disabled="!readingsFormValid"
                 @click="submitReadings"
               >
-                Submit Readings
+                Zählerstände absenden
               </v-btn>
             </v-card-actions>
           </div>
@@ -324,7 +399,7 @@
       >
         <v-card-title>
           <v-icon class="mr-2">mdi-credit-card</v-icon>
-          Payment History
+          Zahlungen
         </v-card-title>
         <v-card-text>
           <v-list>
@@ -336,16 +411,32 @@
                 {{ formatCurrency(payment.amount) }}
               </v-list-item-title>
               <v-list-item-subtitle>
-                {{ formatDate(payment.payment_date) }} -
-                {{ payment.payment_method || "Unknown method" }}
+                {{ formatDate(payment.payment_date) }} –
+                {{ payment.payment_method || "Zahlungsart unbekannt" }}
               </v-list-item-subtitle>
               <template #append>
-                <v-chip size="small" color="success">Paid</v-chip>
+                <v-chip size="small" color="success">Bezahlt</v-chip>
               </template>
             </v-list-item>
           </v-list>
         </v-card-text>
       </v-card>
+
+      <!-- Further information -->
+      <v-card class="mt-6">
+        <v-card-title>
+          <v-icon class="mr-2">mdi-information</v-icon>
+          Weitere Informationen
+        </v-card-title>
+        <v-card-text class="text-body-1">
+          Im Zählerschrank findest Du einen schwarzen Ordner, der weitere
+          Informationen zum Haus enthält.
+        </v-card-text>
+      </v-card>
+
+      <div class="text-center text-h6 mt-8 mb-2">
+        Wir wünschen Dir einen schönen Aufenthalt auf der schönen Insel Amrum!
+      </div>
     </div>
 
     <!-- Simple Footer for Guest View -->
@@ -354,9 +445,13 @@
       v-if="!loading && !error"
     >
       <div class="text-caption text-medium-emphasis">
-        © 2024 Amrum Property Management. All rights reserved.
+        © {{ currentYear }} Amrum Property Management
       </div>
     </div>
+
+    <v-snackbar v-model="snackbar" :color="snackbarColor" :timeout="4000">
+      {{ snackbarText }}
+    </v-snackbar>
   </div>
 </template>
 
@@ -372,10 +467,15 @@ const token = computed(() => route.params.token as string);
 const booking = ref<GuestBookingResponse | null>(null);
 const loading = ref(true);
 const error = ref(false);
-const errorMessage = ref("");
 const submittingReadings = ref(false);
 const readingsFormValid = ref(false);
 const readingsForm = ref();
+
+const snackbar = ref(false);
+const snackbarText = ref("");
+const snackbarColor = ref("success");
+
+const currentYear = new Date().getFullYear();
 
 const readingsData = ref({
   electricity_start: undefined as number | undefined,
@@ -387,14 +487,19 @@ const readingsData = ref({
 
 // Validation rules
 const numberRules = [
-  (v: any) => (v !== undefined && v !== null) || "Reading is required",
-  (v: any) =>
-    v === undefined || v === null || v >= 0 || "Reading must be positive",
+  (v: any) => (v !== undefined && v !== null && v !== "") || "Pflichtfeld",
   (v: any) =>
     v === undefined ||
     v === null ||
+    v === "" ||
+    v >= 0 ||
+    "Bitte einen Wert ab 0 eingeben",
+  (v: any) =>
+    v === undefined ||
+    v === null ||
+    v === "" ||
     !isNaN(v) ||
-    "Reading must be a valid number",
+    "Bitte eine gültige Zahl eingeben",
 ];
 
 // Computed properties
@@ -406,19 +511,29 @@ const nightsCount = computed(() => {
   return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 });
 
+// 0 is a valid tourist tax amount, only an empty value means "not entered"
+const hasKurtaxe = computed(
+  () =>
+    booking.value?.kurtaxe_amount !== null &&
+    booking.value?.kurtaxe_amount !== undefined
+);
+
 // Methods
+const showSnackbar = (text: string, color = "success") => {
+  snackbarText.value = text;
+  snackbarColor.value = color;
+  snackbar.value = true;
+};
+
 const loadBooking = async () => {
   loading.value = true;
   error.value = false;
-  errorMessage.value = "";
 
   try {
     booking.value = await BookingService.getGuestBookingByToken(token.value);
   } catch (err: any) {
     console.error("Error loading booking:", err);
     error.value = true;
-    errorMessage.value =
-      err.response?.data?.message || "Booking not found or link has expired.";
   } finally {
     loading.value = false;
   }
@@ -434,13 +549,12 @@ const submitReadings = async () => {
     // Reload the booking to get updated data
     await loadBooking();
 
-    // Show success message
-    alert("Readings submitted successfully!");
+    showSnackbar("Zählerstände erfolgreich übermittelt. Vielen Dank!");
   } catch (err: any) {
     console.error("Error submitting readings:", err);
-    alert(
-      err.response?.data?.message ||
-        "Error submitting readings. Please try again."
+    showSnackbar(
+      "Die Zählerstände konnten nicht übermittelt werden. Bitte versuche es noch einmal.",
+      "error"
     );
   } finally {
     submittingReadings.value = false;
@@ -448,7 +562,7 @@ const submitReadings = async () => {
 };
 
 const formatDate = (dateString: string) => {
-  return new Date(dateString).toLocaleDateString("en-US", {
+  return new Date(dateString).toLocaleDateString("de-DE", {
     weekday: "long",
     year: "numeric",
     month: "long",
@@ -463,36 +577,37 @@ const formatCurrency = (amount: number) => {
   }).format(amount);
 };
 
+// Internal workflow states are grouped into what is meaningful for a guest
 const getStatusText = (status: string) => {
   const statusMap: Record<string, string> = {
-    new: "New",
-    confirmed: "Confirmed",
-    kurkarten_requested: "Kurkarten Requested",
-    ready_for_arrival: "Ready for Arrival",
-    arriving: "Arriving",
-    on_site: "On Site",
-    departing: "Departing",
-    departed_readings_due: "Readings Due",
-    departed_invoice_due: "Invoice Due",
-    departed_payment_due: "Payment Due",
-    departed_done: "Completed",
+    new: "Angefragt",
+    confirmed: "Bestätigt",
+    kurkarten_requested: "Bestätigt",
+    ready_for_arrival: "Bestätigt",
+    arriving: "Bestätigt",
+    on_site: "Vor Ort",
+    departing: "Abreise",
+    departed_readings_due: "Abgereist",
+    departed_invoice_due: "Abgereist",
+    departed_payment_due: "Abgereist",
+    departed_done: "Abgeschlossen",
   };
-  return statusMap[status] || "Unknown";
+  return statusMap[status] || "Unbekannt";
 };
 
 const getStatusColor = (status: string) => {
   const colorMap: Record<string, string> = {
     new: "warning",
-    confirmed: "primary",
-    kurkarten_requested: "info",
+    confirmed: "success",
+    kurkarten_requested: "success",
     ready_for_arrival: "success",
-    arriving: "purple",
-    on_site: "green",
+    arriving: "success",
+    on_site: "success",
     departing: "orange",
-    departed_readings_due: "error",
-    departed_invoice_due: "purple",
-    departed_payment_due: "deep-orange",
-    departed_done: "success",
+    departed_readings_due: "grey",
+    departed_invoice_due: "grey",
+    departed_payment_due: "grey",
+    departed_done: "grey",
   };
   return colorMap[status] || "grey";
 };
