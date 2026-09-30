@@ -246,6 +246,12 @@ export interface GuestPaymentResponse {
   modified_at: string;
 }
 
+export interface WastePickup {
+  date: string; // collection day
+  put_out_date: string; // evening before
+  bin_type: "restmuell" | "papier" | "plastik";
+}
+
 export interface GuestBookingResponse {
   id: number;
   check_in: string;
@@ -270,6 +276,8 @@ export interface GuestBookingResponse {
   guest_email: string;
   meter_readings: MeterReading | null;
   payments: GuestPaymentResponse[] | null;
+  // null if the waste calendar does not cover the stay
+  waste_pickups: WastePickup[] | null;
 }
 
 // API Service Classes
