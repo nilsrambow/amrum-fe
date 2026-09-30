@@ -25,6 +25,14 @@
             >
               Edit Booking
             </v-btn>
+            <v-btn
+              color="error"
+              prepend-icon="mdi-delete"
+              variant="outlined"
+              @click="deleteDialog = true"
+            >
+              Delete Booking
+            </v-btn>
           </div>
         </div>
       </v-col>
@@ -758,6 +766,49 @@
       {{ snackbarText }}
     </v-snackbar>
 
+    <!-- Delete Confirmation Dialog -->
+    <v-dialog v-model="deleteDialog" max-width="450px">
+      <v-card>
+        <v-card-title class="text-h6">
+          <v-icon class="mr-2" color="error">mdi-delete-alert</v-icon>
+          Delete Booking?
+        </v-card-title>
+        <v-card-text>
+          <p>
+            This will permanently delete
+            <strong>Booking #{{ booking.id }}</strong>
+            <span v-if="booking.guest">
+              for
+              <strong
+                >{{ booking.guest.first_name }}
+                {{ booking.guest.last_name }}</strong
+              >
+            </span>
+            ({{ formatDateRange(booking.check_in, booking.check_out) }}).
+          </p>
+          <p class="text-error mt-2">This action cannot be undone.</p>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer />
+          <v-btn
+            variant="text"
+            @click="deleteDialog = false"
+            :disabled="deleting"
+          >
+            Cancel
+          </v-btn>
+          <v-btn
+            color="error"
+            variant="elevated"
+            :loading="deleting"
+            @click="handleDeleteBooking"
+          >
+            Delete
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
     <!-- Payment Dialog -->
     <v-dialog v-model="paymentDialog" max-width="500px">
       <v-card>
@@ -1076,6 +1127,8 @@ const paymentData = ref({
 const paymentMethods = ["Cash", "Credit Card", "Bank Transfer", "PayPal"];
 const registeringPayment = ref(false);
 const copyingLink = ref(false);
+const deleteDialog = ref(false);
+const deleting = ref(false);
 
 // Validation rules
 const amountRules = [
@@ -1515,6 +1568,23 @@ const copyMagicLink = async () => {
     showSnackbar("Error copying link", "error");
   } finally {
     copyingLink.value = false;
+  }
+};
+
+const handleDeleteBooking = async () => {
+  if (!booking.value) return;
+  deleting.value = true;
+  try {
+    await BookingService.delete(booking.value.id);
+    deleteDialog.value = false;
+    router.push("/bookings");
+  } catch (error: any) {
+    showSnackbar(
+      error.response?.data?.detail || "Failed to delete booking",
+      "error"
+    );
+  } finally {
+    deleting.value = false;
   }
 };
 

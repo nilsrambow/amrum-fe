@@ -1,4 +1,4 @@
-import { createRouter, createWebHashHistory, RouteRecordRaw } from "vue-router";
+import { createRouter, createWebHistory, RouteRecordRaw } from "vue-router";
 import HomeView from "../views/HomeView.vue";
 import { useAuth } from "../composables/useAuth";
 
@@ -93,6 +93,14 @@ const routes: Array<RouteRecordRaw> = [
     props: true,
   },
   {
+    path: "/availability",
+    name: "availability",
+    component: () =>
+      import(
+        /* webpackChunkName: "availability" */ "../views/AvailabilityView.vue"
+      ),
+  },
+  {
     path: "/about",
     name: "about",
     // route level code-splitting
@@ -104,7 +112,7 @@ const routes: Array<RouteRecordRaw> = [
 ];
 
 const router = createRouter({
-  history: createWebHashHistory(),
+  history: createWebHistory(),
   routes,
 });
 
