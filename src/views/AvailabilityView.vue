@@ -11,7 +11,9 @@
         <div v-for="month in months" :key="month.index" class="month-card">
           <div class="month-title">{{ month.name }}</div>
           <div class="calendar-grid">
-            <div v-for="h in dayHeaders" :key="h" class="cal-header">{{ h }}</div>
+            <div v-for="h in dayHeaders" :key="h" class="cal-header">
+              {{ h }}
+            </div>
             <div
               v-for="(day, i) in month.days"
               :key="i"
@@ -51,7 +53,8 @@
 import { ref, onMounted } from "vue";
 import axios from "axios";
 
-const API_BASE_URL = process.env.VUE_APP_API_BASE_URL || "http://localhost:8000";
+const API_BASE_URL =
+  process.env.VUE_APP_API_BASE_URL || "http://localhost:8000";
 
 interface DateRange {
   start: string;
@@ -76,8 +79,18 @@ const loading = ref(true);
 const ranges = ref<DateRange[]>([]);
 
 const monthNames = [
-  "Januar", "Februar", "März", "April", "Mai", "Juni",
-  "Juli", "August", "September", "Oktober", "November", "Dezember",
+  "Januar",
+  "Februar",
+  "März",
+  "April",
+  "Mai",
+  "Juni",
+  "Juli",
+  "August",
+  "September",
+  "Oktober",
+  "November",
+  "Dezember",
 ];
 
 function pad(n: number) {
@@ -224,7 +237,13 @@ onMounted(async () => {
 }
 
 .cal-day-arrival {
-  background: linear-gradient(135deg, white 0%, white 49%, #ffebee 50%, #ffebee 100%);
+  background: linear-gradient(
+    135deg,
+    white 0%,
+    white 49%,
+    #ffebee 50%,
+    #ffebee 100%
+  );
   position: relative;
 }
 
@@ -234,19 +253,34 @@ onMounted(async () => {
   inset: 0;
   background: linear-gradient(
     135deg,
-    transparent 0%, transparent 48%,
-    #d32f2f 49%, #d32f2f 51%,
-    transparent 52%, transparent 100%
+    transparent 0%,
+    transparent 48%,
+    #d32f2f 49%,
+    #d32f2f 51%,
+    transparent 52%,
+    transparent 100%
   );
   pointer-events: none;
 }
 
 .cal-day-departure {
-  background: linear-gradient(135deg, #ffebee 0%, #ffebee 49%, white 50%, white 100%);
+  background: linear-gradient(
+    135deg,
+    #ffebee 0%,
+    #ffebee 49%,
+    white 50%,
+    white 100%
+  );
 }
 
 .cal-day-split {
-  background: linear-gradient(135deg, #ffebee 0%, #ffebee 49%, #ffebee 50%, #ffebee 100%);
+  background: linear-gradient(
+    135deg,
+    #ffebee 0%,
+    #ffebee 49%,
+    #ffebee 50%,
+    #ffebee 100%
+  );
   position: relative;
 }
 
@@ -256,9 +290,12 @@ onMounted(async () => {
   inset: 0;
   background: linear-gradient(
     135deg,
-    transparent 0%, transparent 48%,
-    #d32f2f 49%, #d32f2f 51%,
-    transparent 52%, transparent 100%
+    transparent 0%,
+    transparent 48%,
+    #d32f2f 49%,
+    #d32f2f 51%,
+    transparent 52%,
+    transparent 100%
   );
   pointer-events: none;
 }
@@ -280,11 +317,23 @@ onMounted(async () => {
 }
 
 .legend-swatch.arrival {
-  background: linear-gradient(135deg, white 0%, white 49%, #ffebee 50%, #ffebee 100%);
+  background: linear-gradient(
+    135deg,
+    white 0%,
+    white 49%,
+    #ffebee 50%,
+    #ffebee 100%
+  );
 }
 
 .legend-swatch.departure {
-  background: linear-gradient(135deg, #ffebee 0%, #ffebee 49%, white 50%, white 100%);
+  background: linear-gradient(
+    135deg,
+    #ffebee 0%,
+    #ffebee 49%,
+    white 50%,
+    white 100%
+  );
 }
 
 .gap-4 {
