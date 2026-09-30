@@ -86,16 +86,8 @@
             <div class="text-subtitle-2 text-medium-emphasis mb-2">
               Gäste-Informationen
             </div>
-            <v-row>
-              <v-col cols="12" md="6">
-                <div class="text-subtitle-2 text-medium-emphasis">Name</div>
-                <div class="text-body-1">{{ booking.guest_name }}</div>
-              </v-col>
-              <v-col cols="12" md="6">
-                <div class="text-subtitle-2 text-medium-emphasis">E-Mail</div>
-                <div class="text-body-1">{{ booking.guest_email }}</div>
-              </v-col>
-            </v-row>
+            <div class="text-subtitle-2 text-medium-emphasis">Vorname</div>
+            <div class="text-body-1">{{ booking.guest_first_name }}</div>
           </div>
 
           <v-divider class="my-4" v-if="hasKurtaxe"></v-divider>

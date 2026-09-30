@@ -272,8 +272,7 @@ export interface GuestBookingResponse {
   kurtaxe_amount: number | null;
   kurtaxe_notes: string | null;
   created_at: string;
-  guest_name: string;
-  guest_email: string;
+  guest_first_name: string;
   meter_readings: MeterReading | null;
   payments: GuestPaymentResponse[] | null;
   // null if the waste calendar does not cover the stay
