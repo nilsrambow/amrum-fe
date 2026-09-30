@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <rect width="64" height="64" rx="10" fill="#f6f1e7"/>
+  <g fill="none" stroke="#2f3a4a" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round">
+    <!-- chimney -->
+    <path d="M39 15V8h5v11"/>
+    <!-- thatched roof -->
+    <path d="M6 37L17 15h30l11 22z"/>
+    <!-- gable rising into the roof -->
+    <path d="M23 37c0-8 4-13 9-13s9 5 9 13"/>
+    <!-- walls -->
+    <path d="M11 37v18h42V37"/>
+    <!-- door -->
+    <path d="M28 55V46a4 4 0 0 1 8 0v9"/>
+  </g>
+  <!-- windows -->
+  <g fill="#2f3a4a">
+    <rect x="15" y="43" width="6" height="6" rx="1"/>
+    <rect x="43" y="43" width="6" height="6" rx="1"/>
+  </g>
+</svg>
